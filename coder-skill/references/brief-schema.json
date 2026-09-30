@@ -1,0 +1,43 @@
+{
+  "$comment": "Frontstep brand brief. Written by the research step in n8n when a lead agrees to see a demo; updated with confirmed data after payment.",
+  "mode": "demo",
+  "language": "pt-BR",
+  "slug": "oficina-do-beto-bh",
+  "business": {
+    "name": "Oficina do Beto",
+    "niche": "mecânica automotiva",
+    "city": "Belo Horizonte",
+    "neighborhood": "Santa Tereza",
+    "founded_year": null,
+    "one_liner": "Seu carro pronto no mesmo dia",
+    "services": [{ "name": "Revisão", "price": null, "description": null }],
+    "differentiators": ["Resolve no mesmo dia", "Explica o problema antes de cobrar"],
+    "audience": "Moradores do bairro com carro popular"
+  },
+  "contact": {
+    "whatsapp": "5531999999999",
+    "phone": "+55 31 3333-3333",
+    "instagram": "oficinadobeto",
+    "email": null,
+    "address": "Rua Tupinambás, 412, Santa Tereza, Belo Horizonte, MG",
+    "maps_url": "https://maps.google.com/?cid=...",
+    "hours": { "mon": "08:00-18:00", "tue": "08:00-18:00", "wed": "08:00-18:00", "thu": "08:00-18:00", "fri": "08:00-18:00", "sat": "08:00-12:00", "sun": null }
+  },
+  "google": {
+    "rating": 4.8,
+    "review_count": 213,
+    "reviews": [{ "author": "Marcos", "rating": 5, "date": "2026-09-01", "text": "Honesto, resolveu no mesmo dia." }]
+  },
+  "brand": {
+    "logo_url": null,
+    "colors_seen": ["#C8231B", "#F2B705"],
+    "vibe": "popular, direto, de bairro",
+    "style_hint": "letreiro"
+  },
+  "media": {
+    "photos": [{ "url": "https://...", "caption": "fachada", "generated": false }]
+  },
+  "conversation_notes": "Anything the owner said on WhatsApp that matters (e.g. 'o forte é freio e suspensão').",
+  "revisions": [],
+  "domain": null
+}
