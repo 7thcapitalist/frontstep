@@ -1,0 +1,43 @@
+#!/usr/bin/env node
+// Re-runs the browser gate on every completed synthetic niche example.
+import { spawn } from 'node:child_process';
+import { readFile, readdir, stat } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const frontstep = path.dirname(here);
+const catalog = JSON.parse(await readFile(path.join(here, 'examples', 'catalog.json'), 'utf8'));
+const only = process.argv.find(arg => arg.startsWith('--slug='))?.slice(7);
+if (only && !catalog.some(entry => entry.slug === only)) throw new Error(`Unknown example: ${only}`);
+let failed = 0;
+for (const entry of catalog.filter(item => !only || item.slug === only)) {
+  const folder = path.join(here, 'examples', entry.slug);
+  const publicDir = path.join(folder, 'public');
+  if (!(await stat(path.join(publicDir, 'index.html')).catch(() => null))?.isFile()) { console.log(`${entry.label}: pending`); continue; }
+  const index = await readFile(path.join(publicDir, 'index.html'), 'utf8');
+  const absoluteHtmlAsset = /(?:src|href)=["']\/(?!\/)/i.test(index);
+  const styles = (await readdir(publicDir)).filter(name => name.endsWith('.css'));
+  const absoluteCssAsset = (await Promise.all(styles.map(name => readFile(path.join(publicDir, name), 'utf8'))))
+    .some(css => /url\(\s*["']?\/(?!\/)/i.test(css));
+  if (absoluteHtmlAsset || absoluteCssAsset) {
+    console.log(`${entry.label}: FAIL (root-relative asset path breaks the /examples/${entry.slug}/ preview)`);
+    failed++;
+    continue;
+  }
+  const args = [path.join(frontstep, 'local-qa', 'qa.mjs'), publicDir,
+    '--brief', path.join(frontstep, 'local-briefs', `${entry.brief}.json`),
+    '--scenario', path.join(frontstep, 'local-briefs', `${entry.brief}.scenario.json`),
+    '--out', path.join(folder, 'qa'), '--json'];
+  const code = await new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, args, { cwd: frontstep, windowsHide: true, stdio: 'ignore' });
+    child.on('error', reject);
+    child.on('close', value => resolve(value));
+  });
+  const report = await readFile(path.join(folder, 'qa', 'qa-result.json'), 'utf8').then(JSON.parse).catch(() => null);
+  const failures = report?.checks?.filter(check => !check.passed) || [];
+  const passed = code === 0 && report?.passed === true;
+  console.log(`${entry.label}: ${passed ? 'PASS' : 'FAIL'} (${report?.checks?.length || 0} checks, ${failures.length} failures)`);
+  if (!passed) { failed++; for (const issue of failures.slice(0, 4)) console.log(`  ${issue.viewport || 'all'} ${issue.code}: ${issue.detail}`); }
+}
+process.exitCode = failed ? 1 : 0;

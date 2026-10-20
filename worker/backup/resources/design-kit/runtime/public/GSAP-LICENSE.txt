@@ -1,0 +1,16 @@
+GSAP runtime license notice
+
+This directory includes gsap.min.js and ScrollTrigger.min.js from the official
+gsap npm package, version 3.15.0 (GreenSock / Webflow). These runtime files are
+subject to the GSAP Standard No Charge License, not the MIT license that applies
+to the separate greensock/gsap-skills instructional repository.
+
+License and usage terms: https://gsap.com/community/standard-license/
+Package: https://www.npmjs.com/package/gsap/v/3.15.0
+Registry tarball: https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz
+Registry SRI: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==
+
+The source package was fetched with npm pack --ignore-scripts. Only the two
+browser runtime distributions above are redistributed here. Review the current
+official license before distribution in another product or use as a visual
+animation authoring tool.

@@ -1,0 +1,11 @@
+/* All layout and content remain visible without JS; these rules only polish mounted scenes. */
+.fs-motion-follower{position:fixed;top:0;left:0;width:min(23vw,240px);aspect-ratio:4/5;z-index:90;pointer-events:none;overflow:hidden;opacity:0;visibility:hidden;transform:translate3d(0,0,0) scale(.96);border-radius:12px;box-shadow:0 18px 45px rgba(0,0,0,.2)}
+.fs-motion-follower img{display:block;width:100%;height:100%;object-fit:cover}
+[data-motion-status="mounted"] [data-motion-part="photo"],
+[data-motion-status="mounted"] [data-motion-part="landscape"]{will-change:transform}
+[data-motion-part="progress"],
+[data-motion-part="rail"]{transform-origin:left center}
+[data-motion-header]{transition:background-color .2s ease-out,box-shadow .2s ease-out}
+[data-motion-header].fs-motion-scrolled{box-shadow:0 8px 24px rgba(0,0,0,.1)}
+@media(max-width:820px),(hover:none),(pointer:coarse){.fs-motion-follower{display:none}}
+@media(prefers-reduced-motion:reduce){[data-motion-header]{transition:none}[data-motion-status="reduced"] [data-motion-part]{will-change:auto}}

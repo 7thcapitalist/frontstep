@@ -1,0 +1,13 @@
+{
+  "steps":[
+    {"action":"select","selector":"[data-testid='catalogo-categoria']","value":"cadernos"},
+    {"action":"select","selector":"[data-testid='catalogo-produto']","value":"caderno-pontilhado"},
+    {"action":"fill","selector":"[data-testid='catalogo-quantidade']","value":"2"}
+  ],
+  "assertions":[
+    {"kind":"visible","selector":"[data-feature='catalogo']"},
+    {"kind":"text","selector":"[data-testid='catalogo-resumo']","includes":"R$ 48,00"},
+    {"kind":"attribute","selector":"[data-testid='catalogo-whatsapp']","name":"href","includes":"wa.me/5500000000000"},
+    {"kind":"attribute","selector":"[data-testid='catalogo-whatsapp']","name":"href","includes":"48"}
+  ]
+}

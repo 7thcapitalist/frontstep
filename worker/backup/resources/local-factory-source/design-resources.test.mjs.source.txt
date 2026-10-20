@@ -1,0 +1,53 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { assessReview, weights, verifySpatialPlan } from './design-resources.mjs';
+
+const review = (score, passed = true) => ({ score: 10, passed, criteria: Object.fromEntries(Object.keys(weights).map(key => [key, score])) });
+
+test('the worker calculates the rating instead of trusting a claimed overall score', () => {
+  const result = assessReview(review(8));
+  assert.equal(result.score, 8);
+  assert.equal(result.passed, false);
+});
+test('exactly nine does not satisfy strictly above nine', () => {
+  assert.equal(assessReview(review(9)).passed, false);
+  assert.equal(assessReview(review(9.1)).passed, true);
+});
+test('a weak dimension or reviewer rejection blocks a high average', () => {
+  const weak = review(10);
+  weak.criteria.responsive = 8.4;
+  assert.equal(assessReview(weak).passed, false);
+  assert.equal(assessReview(review(9.5, false)).passed, false);
+});
+test('missing criteria cannot silently pass', () => {
+  const partial = review(10);
+  delete partial.criteria.motion;
+  assert.throws(() => assessReview(partial));
+});
+
+test('a 3D brief cannot proceed with only a motion library name',()=>{
+  assert.throws(()=>verifySpatialPlan({motionRecipe:'Use Three.js and ScrollTrigger'}));
+  assert.equal(verifySpatialPlan({motionRecipe:'CSS aperture over a real photograph'}),null);
+});
+
+test('spatial plans require distinct geometric states and a complete page',()=>{
+  const spatial=Object.fromEntries(['businessMetaphor','firstViewport','assets','mobile','fallback','budget','continuation'].map(key=>[key,'Concrete decision for this business.']));
+  spatial.states=['Open assembly','Aligned assembly','Expanded assembly'].map(geometry=>({trigger:'Native scroll interval',geometry,camera:'Camera changes its angle',purpose:'Explains the next business action'}));
+  assert.equal(verifySpatialPlan({spatialPlan:spatial}),spatial);
+  const repeat=structuredClone(spatial);repeat.states[1].geometry=repeat.states[0].geometry;
+  assert.throws(()=>verifySpatialPlan({spatialPlan:repeat}));
+  delete spatial.mobile;assert.throws(()=>verifySpatialPlan({spatialPlan:spatial}));
+});
+
+test('weighted 9.05 passes without presentation rounding changing eligibility', () => {
+  const input = review(9);
+  Object.assign(input.criteria, { typography: 9.2, imagery: 8.9, interaction: 9.2 });
+  const result = assessReview(input);
+  assert.equal(result.score, 9.05);
+  assert.equal(result.displayScore, '9.05');
+  assert.equal(result.passed, true);
+});
+
+test('averages just below nine do not round into eligibility', () => {
+  assert.equal(assessReview(review(8.99)).passed, false);
+});

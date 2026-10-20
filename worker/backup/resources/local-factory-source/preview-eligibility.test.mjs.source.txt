@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { previewEligibility } from './preview-eligibility.mjs';
+import { weights } from './design-resources.mjs';
+
+const hash = 'a'.repeat(64);
+const valid = () => ({state:'succeeded',qa:{passed:true},visual:{passed:true,score:9.2,criteria:Object.fromEntries(Object.keys(weights).map(k=>[k,9.2]))},motion:{signatureEvidence:{hasMeaningfulChange:true},reducedMotion:true,mobileReducedMotion:{matches:true,hiddenMeaningful:[]},hiddenMeaningful:[],pageErrors:[]},publicSha256:hash});
+test('validated bytes pass; edited bytes and unreadable artifacts fail closed', async () => {
+  assert.equal((await previewEligibility(valid(), '.', async()=>hash)).ok,true);
+  assert.equal((await previewEligibility(valid(), '.', async()=>'b'.repeat(64))).ok,false);
+  assert.equal((await previewEligibility(valid(), '.', async()=>{throw Error('missing');})).ok,false);
+});
+test('historical success, missing gates and weak reviews cannot become current previews', async () => {
+  const variants=[{state:'succeeded'}, {...valid(),qa:{passed:false}}, {...valid(),publicSha256:null}, {...valid(),motion:{}}, {...valid(),visual:{...valid().visual,passed:false}}];
+  for(const job of variants) assert.equal((await previewEligibility(job,'.',async()=>hash)).ok,false);
+});
+test('motion errors and hidden reduced-motion content block previews', async () => {
+  for (const patch of [{pageErrors:['error']},{hiddenMeaningful:['title']},{mobileReducedMotion:{matches:true,hiddenMeaningful:['feature']}}]) {
+    const job=valid();Object.assign(job.motion,patch);
+    assert.equal((await previewEligibility(job,'.',async()=>hash)).ok,false);
+  }
+});

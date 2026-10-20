@@ -1,0 +1,594 @@
+<title>Painel da Fábrica Frontstep</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: coluna única, seções empilhadas. Topo com placar, funil em barras horizontais,
+   depois builder, captura, operação. Nada de grid decorativo: cada bloco tem a largura que precisa. */
+:root{
+  --papel:#f5f4f1;
+  --cartao:#ffffff;
+  --cartao2:#faf9f6;
+  --tinta:#15201d;
+  --tinta2:#5b6864;
+  --tinta3:#8a948f;
+  --linha:#e0ddd6;
+  --linha2:#cfcbc2;
+  --acento:#0d6b56;
+  --acento-fraco:#9ecbbd;
+  --barra:#0d6b56;
+  --ok:#1a7a4f;
+  --aviso:#9a6410;
+  --serio:#a44b14;
+  --critico:#a32b22;
+  --neutro:#6d7873;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --papel:#101513;--cartao:#19201d;--cartao2:#1e2623;--tinta:#eaeee9;--tinta2:#9ba6a0;--tinta3:#717d77;
+  --linha:#2a3330;--linha2:#3a4440;--acento:#49c79b;--acento-fraco:#2f6b57;--barra:#3fb389;
+  --ok:#4cc38a;--aviso:#d9a648;--serio:#e0813f;--critico:#e8695d;--neutro:#8a948f;color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --papel:#101513;--cartao:#19201d;--cartao2:#1e2623;--tinta:#eaeee9;--tinta2:#9ba6a0;--tinta3:#717d77;
+  --linha:#2a3330;--linha2:#3a4440;--acento:#49c79b;--acento-fraco:#2f6b57;--barra:#3fb389;
+  --ok:#4cc38a;--aviso:#d9a648;--serio:#e0813f;--critico:#e8695d;--neutro:#8a948f;color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--papel);color:var(--tinta);font-family:"Source Sans 3",-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.45}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:0 56px}
+h1{font-family:Archivo,system-ui,sans-serif;font-weight:700;font-size:1.45rem;letter-spacing:-.015em;margin:0;text-wrap:balance}
+h2{font-family:Archivo,sans-serif;font-weight:600;font-size:1.02rem;margin:0 0 2px;letter-spacing:-.005em}
+.sub{color:var(--tinta2);font-size:.85rem}
+.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+
+header.topo{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--papel);border-bottom:1px solid var(--linha);padding-block:14px 11px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between}
+header.topo .ident{min-width:0}
+button{font:inherit}
+.btn{font-size:.84rem;border:1px solid var(--linha2);background:var(--cartao);color:var(--tinta);border-radius:7px;padding:6px 11px;cursor:pointer}
+.btn:hover{border-color:var(--acento)}
+.btn:focus-visible,a:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+
+section{margin-top:26px}
+.cab{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
+.card{background:var(--cartao);border:1px solid var(--linha);border-radius:10px;padding:14px 15px}
+
+/* placar */
+.placar{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px;margin-top:14px}
+.tile{background:var(--cartao);border:1px solid var(--linha);border-radius:9px;padding:11px 12px;min-width:0}
+.tile .v{font-family:"IBM Plex Mono",monospace;font-size:1.5rem;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tinta2);margin-top:3px}
+.tile .d{font-size:.74rem;color:var(--tinta3);margin-top:2px}
+
+/* funil */
+.funil{display:flex;flex-direction:column;gap:7px}
+.etapa{display:grid;grid-template-columns:148px 1fr 54px;gap:10px;align-items:center;min-width:0}
+.etapa .rot{font-size:.86rem;color:var(--tinta2);min-width:0;overflow-wrap:anywhere}
+.trilha{background:var(--cartao2);border:1px solid var(--linha);border-radius:5px;height:24px;position:relative;overflow:hidden}
+.barra{height:100%;background:var(--barra);border-radius:0 4px 4px 0;min-width:2px;position:relative}
+.etapa .qt{font-family:"IBM Plex Mono",monospace;font-size:.9rem;text-align:right;font-variant-numeric:tabular-nums}
+.etapa:hover .rot{color:var(--tinta)}
+.dica{position:absolute;z-index:20;background:var(--tinta);color:var(--papel);font-size:.78rem;padding:6px 9px;border-radius:6px;pointer-events:none;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+
+/* tabelas */
+.rolagem{overflow-x:auto;border:1px solid var(--linha);border-radius:10px;background:var(--cartao)}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--linha);vertical-align:top}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tinta2);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+a{color:var(--acento)}
+
+/* estado com ícone + rótulo, nunca cor sozinha */
+.est{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;white-space:nowrap}
+.est svg{flex:0 0 auto}
+.est.ok{color:var(--ok)} .est.aviso{color:var(--aviso)} .est.serio{color:var(--serio)}
+.est.critico{color:var(--critico)} .est.neutro{color:var(--neutro)}
+
+.vazio{color:var(--tinta3);font-size:.88rem;padding:14px 15px}
+.falha{border:1px solid var(--linha2);border-radius:9px;padding:12px 14px;background:var(--cartao2);font-size:.86rem;color:var(--tinta2)}
+.falha b{display:block;color:var(--tinta);font-family:Archivo,sans-serif;font-size:.92rem;margin-bottom:3px}
+.velho{font-size:.72rem;color:var(--tinta3)}
+.feed{list-style:none;margin:0;padding:0;font-size:.85rem}
+.feed li{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--linha)}
+.feed li:last-child{border-bottom:none}
+.feed time{flex:0 0 78px;color:var(--tinta3);font-family:"IBM Plex Mono",monospace;font-size:.76rem}
+.feed .ev{flex:1;min-width:0;overflow-wrap:anywhere}
+footer.pe{margin-top:34px;padding-top:14px;border-top:1px solid var(--linha);color:var(--tinta3);font-size:.78rem}
+@media (max-width:520px){ .etapa{grid-template-columns:106px 1fr 46px} }
+</style>
+
+<div class="wrap">
+  <header class="topo">
+    <div class="ident">
+      <h1>Painel da Fábrica Frontstep</h1>
+      <div class="sub" id="selo">Conectando ao n8n…</div>
+    </div>
+    <button class="btn" id="btn-rec" type="button">Atualizar</button>
+  </header>
+
+  <div class="placar" id="placar"></div>
+
+  <section id="sec-funil">
+    <div class="cab"><div><h2>Funil por etapa</h2><div class="sub" id="funil-sub">Retrato do CRM, gravado a cada rodada de captura</div></div></div>
+    <div id="funil-corpo" class="card"><div class="vazio">Carregando…</div></div>
+  </section>
+
+  <section id="sec-builder">
+    <div class="cab"><div><h2>O builder</h2><div class="sub">O que o mini PC está fazendo e o que já ficou pronto</div></div></div>
+    <div id="builder-corpo"><div class="card"><div class="vazio">Carregando…</div></div></div>
+  </section>
+
+  <section id="sec-nicho">
+    <div class="cab"><div><h2>Por nicho</h2><div class="sub">Onde vale continuar e onde não</div></div></div>
+    <div id="nicho-corpo"><div class="card"><div class="vazio">Carregando…</div></div></div>
+  </section>
+
+  <section id="sec-captura">
+    <div class="cab"><div><h2>Captura</h2><div class="sub">Alvos e quando cada um foi buscado</div></div></div>
+    <div id="captura-corpo"><div class="card"><div class="vazio">Carregando…</div></div></div>
+  </section>
+
+  <section id="sec-op">
+    <div class="cab"><div><h2>Operação</h2><div class="sub">Workflows e erros recentes</div></div></div>
+    <div id="op-corpo"><div class="card"><div class="vazio">Carregando…</div></div></div>
+  </section>
+
+  <section id="sec-feed">
+    <div class="cab"><div><h2>Atividade</h2><div class="sub">Últimos eventos do ledger</div></div></div>
+    <div id="feed-corpo" class="card"><div class="vazio">Carregando…</div></div>
+  </section>
+
+  <footer class="pe">
+    Lê o n8n ao vivo pelo seu conector, com as suas credenciais. Só leitura: nenhuma chamada daqui gasta execução do n8n.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var SERVIDOR = 'n8n';
+  var PROJETO = 'S13o9Dc9RKwHnPEJ';
+  var TAB = {
+    funil:  'jEGear4IteyXOkXx',
+    builds: 'oBinMFWcxuao8UI6',
+    alvos:  'EG01zb0SiQWhQWwP',
+    ledger: 'NfTDqOIs50U4Im4I'
+  };
+
+  var ICONE = {
+    ok:      '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    aviso:   '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4.6v4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.4" r="1" fill="currentColor"/></svg>',
+    serio:   '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2l6 11H2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 6.4v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    critico: '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5.6 5.6l4.8 4.8M10.4 5.6l-4.8 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    neutro:  '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+  };
+  function estado(tom, texto){
+    var s = document.createElement('span');
+    s.className = 'est ' + tom;
+    s.innerHTML = ICONE[tom] || ICONE.neutro;
+    s.appendChild(document.createTextNode(texto));
+    return s;
+  }
+
+  function el(tag, cls, txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+  function q(id){ return document.getElementById(id); }
+  function num(n){ return (n==null||n==='') ? '–' : Number(n).toLocaleString('pt-BR'); }
+  function brl(n){ return 'R$ ' + (Number(n)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function quando(iso){
+    if(!iso) return '';
+    var d = new Date(iso); if(isNaN(d)) return '';
+    var min = Math.round((Date.now()-d.getTime())/60000);
+    if(min < 1) return 'agora';
+    if(min < 60) return min + ' min';
+    var h = Math.round(min/60);
+    if(h < 24) return h + ' h';
+    return Math.round(h/24) + ' d';
+  }
+  function hora(iso){
+    var d = new Date(iso); if(isNaN(d)) return '';
+    return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+
+  // ---- tooltip das barras
+  var dica=null;
+  function mostraDica(alvo, texto){
+    escondeDica();
+    dica = el('div','dica',texto);
+    document.body.appendChild(dica);
+    var r = alvo.getBoundingClientRect();
+    var t = dica.getBoundingClientRect();
+    var x = Math.min(window.innerWidth - t.width - 8, Math.max(8, r.left + r.width/2 - t.width/2));
+    dica.style.left = x + 'px';
+    dica.style.top = Math.max(8, r.top + window.scrollY - t.height - 7) + 'px';
+  }
+  function escondeDica(){ if(dica){ dica.remove(); dica=null; } }
+  window.addEventListener('scroll', escondeDica, {passive:true});
+
+  // ---- copy de falha por código, nunca um banner genérico só
+  function blocoFalha(err, oque){
+    var cod = (err && err.code) || 'upstream_error';
+    var tit = 'Não deu pra ler ' + oque;
+    var txt;
+    if(cod === 'needs_reauth') txt = 'A conexão com o n8n expirou. Reconecte o n8n em claude.ai, Configurações, Conectores.';
+    else if(cod === 'server_not_connected') txt = 'O conector do n8n não está na sua conta. Adicione em claude.ai, Configurações, Conectores.';
+    else if(cod === 'selection_required') txt = 'Você tem mais de um conector chamado n8n. Escolha um quando o Claude perguntar.';
+    else if(cod === 'not_in_manifest') txt = 'Esta página não tem permissão para esse conector nesta visualização.';
+    else if(cod === 'blocked_by_policy' || cod === 'approval_required') txt = 'A política da sua organização bloqueia essa chamada aqui.';
+    else if(cod === 'server_unavailable') txt = 'O n8n não respondeu agora. Toque em Atualizar em alguns segundos.';
+    else if(cod === 'tool_error') txt = 'O n8n respondeu com erro: ' + ((err && err.message) || 'sem detalhe') + '.';
+    else if(cod === 'not_granted' || cod === 'capability_disabled' || cod === 'capability_removed') txt = 'Esta visualização não pode ler conectores. Abra o painel no app do Claude ou no claude.ai.';
+    else if(cod === 'consent_required') txt = 'Você ainda não liberou o n8n para esta página. Toque em Atualizar para pedir de novo.';
+    else txt = 'Falha ao chamar o n8n (' + cod + ').';
+    var d = el('div','falha');
+    d.appendChild(el('b', null, tit));
+    d.appendChild(document.createTextNode(txt));
+    return d;
+  }
+
+  // ---- estado
+  var S = { funil:null, builds:null, alvos:null, ledger:null, wf:null, exec:null };
+  var E = { funil:null, builds:null, alvos:null, ledger:null, wf:null, exec:null };
+  var carimbo = {};
+  var mcp = null;
+
+  function marcaSelo(){
+    var ts = Object.keys(carimbo).map(function(k){return carimbo[k];}).filter(Boolean);
+    var sel = q('selo');
+    if(!mcp){ return; }
+    if(!ts.length){ sel.textContent = 'Lendo o n8n…'; return; }
+    var mais = Math.max.apply(null, ts);
+    sel.textContent = 'Dados de ' + hora(new Date(mais).toISOString()) + ', há ' + quando(new Date(mais).toISOString());
+  }
+
+  // ================= PLACAR =================
+  function pintaPlacar(){
+    var p = q('placar'); p.textContent='';
+    var f = S.funil && S.funil[0];
+    var builds = S.builds || [];
+    var prontos = builds.filter(function(b){ return b.status==='preview_pronto' && b.preview_url; }).length;
+    var construindo = builds.filter(function(b){ return b.status==='construindo' || b.status==='brief_pronto'; }).length;
+    var gasto30 = 0, envios30 = 0;
+    (S.ledger||[]).forEach(function(r){
+      var t = Date.parse(r.occurred_at || r.createdAt || '');
+      if(!(Date.now() - t < 30*86400000)) return;
+      if(r.kind === 'cost') gasto30 += Number(r.amount_brl)||0;
+      if(r.event === 'outreach_sent' || r.event === 'followup_sent') envios30 += Number(r.qty)||1;
+    });
+    var respondeu = 0;
+    if(f && f.por_nicho_json){
+      try { var pn = JSON.parse(f.por_nicho_json);
+        Object.keys(pn).forEach(function(k){ respondeu += Number(pn[k].respondeu)||0; });
+      } catch(e){}
+    }
+    var tiles = [
+      ['Leads no CRM', f ? num(f.total) : '–', ''],
+      ['A abordar', f ? num(f.novo) : '–', f ? Math.round(100*f.novo/Math.max(1,f.total))+'% do CRM' : ''],
+      ['Já abordados', f ? num(f.contatado + f.precisa_joao + f.negociando + f.pago + f.sem_interesse + f.optout + f.sem_resposta) : '–', envios30 ? envios30+' mensagens em 30d' : ''],
+      ['Responderam', num(respondeu), 'inclui robô de horário'],
+      ['Builds prontos', num(prontos), construindo ? construindo+' na fila' : 'fila vazia'],
+      ['Custo variável 30d', S.ledger ? brl(gasto30) : '–', 'Apify e afins']
+    ];
+    tiles.forEach(function(t){
+      var d = el('div','tile');
+      d.appendChild(el('div','v', t[1]));
+      d.appendChild(el('div','k', t[0]));
+      if(t[2]) d.appendChild(el('div','d', t[2]));
+      p.appendChild(d);
+    });
+  }
+
+  // ================= FUNIL =================
+  var ETAPAS = [
+    ['novo','No poço, nunca abordado'],
+    ['contatado','Mensagem enviada'],
+    ['precisa_joao','Respondeu, precisa do João'],
+    ['aceitou_previa','Aceitou a prévia'],
+    ['previa_enviada','Prévia enviada'],
+    ['negociando','Negociando'],
+    ['pago','Pago'],
+    ['sem_interesse','Sem interesse'],
+    ['optout','Pediu pra parar'],
+    ['sem_resposta','Sem resposta, encerrado'],
+    ['sem_whatsapp','Sem WhatsApp'],
+    ['erro_envio','Erro de envio']
+  ];
+  function pintaFunil(){
+    var alvo = q('funil-corpo'); alvo.textContent='';
+    if(E.funil){ alvo.className=''; alvo.appendChild(blocoFalha(E.funil,'o funil')); return; }
+    alvo.className='card';
+    var f = S.funil && S.funil[0];
+    if(!f){ alvo.appendChild(el('div','vazio','Nenhum retrato gravado ainda. O primeiro sai na próxima rodada de captura.')); return; }
+    var max = Math.max.apply(null, ETAPAS.map(function(e){ return Number(f[e[0]])||0; }).concat([1]));
+    var box = el('div','funil');
+    ETAPAS.forEach(function(e){
+      var v = Number(f[e[0]])||0;
+      if(v === 0) return;
+      var linha = el('div','etapa');
+      linha.appendChild(el('div','rot', e[1]));
+      var tr = el('div','trilha');
+      var b = el('div','barra');
+      b.style.width = Math.max(2, Math.round(100*v/max)) + '%';
+      tr.appendChild(b);
+      tr.tabIndex = 0;
+      var pct = Math.round(1000*v/Math.max(1,f.total))/10;
+      var txt = e[1] + ': ' + num(v) + ' de ' + num(f.total) + ' (' + pct + '%)';
+      tr.addEventListener('mouseenter', function(){ mostraDica(tr, txt); });
+      tr.addEventListener('mouseleave', escondeDica);
+      tr.addEventListener('focus', function(){ mostraDica(tr, txt); });
+      tr.addEventListener('blur', escondeDica);
+      linha.appendChild(tr);
+      linha.appendChild(el('div','qt', num(v)));
+      box.appendChild(linha);
+    });
+    alvo.appendChild(box);
+    var zeros = ETAPAS.filter(function(e){ return !(Number(f[e[0]])||0); }).map(function(e){ return e[1].toLowerCase(); });
+    var nota = el('div','sub');
+    nota.style.marginTop = '12px';
+    var frases = [];
+    var abordados = f.contatado + f.precisa_joao + f.negociando + f.pago + f.sem_interesse + f.optout + f.sem_resposta;
+    if(abordados) frases.push(num(abordados) + ' leads já receberam mensagem e ' + num(f.precisa_joao) + ' voltaram com algo que precisa de resposta humana.');
+    if(zeros.length) frases.push('Etapas ainda em zero: ' + zeros.join(', ') + '.');
+    nota.textContent = frases.join(' ');
+    if(frases.length) alvo.appendChild(nota);
+    if(S.funil && S.funil.length > 1 && S.funil[0].snapshot_at){
+      var hist = el('div','velho');
+      hist.style.marginTop='6px';
+      hist.textContent = 'Retrato de ' + hora(S.funil[0].snapshot_at) + '. ' + S.funil.length + ' retratos guardados.';
+      alvo.appendChild(hist);
+    }
+  }
+
+  // ================= BUILDER =================
+  var EST_BUILD = {
+    brief_pronto:   ['neutro','Na fila'],
+    construindo:    ['aviso','Construindo'],
+    preview_pronto: ['ok','Pronto'],
+    erro_build:     ['critico','Falhou'],
+    reprovado_qa:   ['serio','Reprovado no QA'],
+    pago:           ['ok','Pago']
+  };
+  function pintaBuilder(){
+    var alvo = q('builder-corpo'); alvo.textContent='';
+    if(E.builds){ alvo.appendChild(blocoFalha(E.builds,'os builds')); return; }
+    var b = (S.builds||[]).slice();
+    if(!b.length){ var c=el('div','card'); c.appendChild(el('div','vazio','Nenhum build registrado.')); alvo.appendChild(c); return; }
+    var ordem = {construindo:0, brief_pronto:1, erro_build:2, reprovado_qa:3, preview_pronto:4, pago:5};
+    b.sort(function(x,y){
+      var a = ordem[x.status] != null ? ordem[x.status] : 9;
+      var d = ordem[y.status] != null ? ordem[y.status] : 9;
+      return a-d || Date.parse(y.updatedAt||0) - Date.parse(x.updatedAt||0);
+    });
+    var fila = b.filter(function(r){ return r.status==='construindo' || r.status==='brief_pronto'; });
+    var linha = el('div','sub');
+    linha.style.marginBottom='9px';
+    linha.textContent = fila.length
+      ? fila.length + ' na mão do builder agora: ' + fila.map(function(r){return r.business_name;}).join(', ') + '.'
+      : 'O builder está livre. Nada na fila.';
+    alvo.appendChild(linha);
+
+    var rol = el('div','rolagem');
+    var t = el('table');
+    var thead = el('thead'); var tr = el('tr');
+    ['Negócio','Estado','Nicho','Efeito','Prévia','Mexido'].forEach(function(h,i){
+      var th = el('th', i===5?'n':null, h); tr.appendChild(th);
+    });
+    thead.appendChild(tr); t.appendChild(thead);
+    var tb = el('tbody');
+    b.forEach(function(r){
+      var row = el('tr');
+      row.appendChild(el('td', null, r.business_name || r.slug || '–'));
+      var tdE = el('td');
+      var cfg = EST_BUILD[r.status] || ['neutro', r.status || 'sem estado'];
+      tdE.appendChild(estado(cfg[0], cfg[1]));
+      row.appendChild(tdE);
+      row.appendChild(el('td', null, r.niche || '–'));
+      row.appendChild(el('td', null, r.fx || '–'));
+      var tdP = el('td');
+      if(r.preview_url){
+        var a = el('a', null, 'abrir');
+        a.href = r.preview_url; a.target='_blank'; a.rel='noopener';
+        tdP.appendChild(a);
+      } else { tdP.textContent = '–'; }
+      row.appendChild(tdP);
+      row.appendChild(el('td','n', quando(r.updatedAt || r.createdAt)));
+      tb.appendChild(row);
+    });
+    t.appendChild(tb); rol.appendChild(t); alvo.appendChild(rol);
+  }
+
+  // ================= POR NICHO =================
+  function pintaNicho(){
+    var alvo = q('nicho-corpo'); alvo.textContent='';
+    if(E.funil){ alvo.appendChild(blocoFalha(E.funil,'os números por nicho')); return; }
+    var f = S.funil && S.funil[0];
+    var pn = null;
+    try { pn = f && f.por_nicho_json ? JSON.parse(f.por_nicho_json) : null; } catch(e){}
+    if(!pn || !Object.keys(pn).length){ var c=el('div','card'); c.appendChild(el('div','vazio','Sem retrato por nicho ainda.')); alvo.appendChild(c); return; }
+    var itens = Object.keys(pn).map(function(k){ return {nicho:k, t:pn[k].total||0, n:pn[k].novo||0, a:pn[k].abordado||0, r:pn[k].respondeu||0}; });
+    itens.sort(function(x,y){ return y.t - x.t; });
+    var rol = el('div','rolagem'); var t = el('table');
+    var tr = el('tr');
+    [['Nicho',0],['No CRM',1],['A abordar',1],['Abordados',1],['Responderam',1]].forEach(function(h){
+      tr.appendChild(el('th', h[1]?'n':null, h[0]));
+    });
+    var th = el('thead'); th.appendChild(tr); t.appendChild(th);
+    var tb = el('tbody');
+    itens.forEach(function(i){
+      var row = el('tr');
+      row.appendChild(el('td', null, i.nicho));
+      row.appendChild(el('td','n', num(i.t)));
+      row.appendChild(el('td','n', num(i.n)));
+      row.appendChild(el('td','n', num(i.a)));
+      row.appendChild(el('td','n', num(i.r)));
+      tb.appendChild(row);
+    });
+    t.appendChild(tb); rol.appendChild(t); alvo.appendChild(rol);
+  }
+
+  // ================= CAPTURA =================
+  function pintaCaptura(){
+    var alvo = q('captura-corpo'); alvo.textContent='';
+    if(E.alvos){ alvo.appendChild(blocoFalha(E.alvos,'os alvos de captura')); return; }
+    var a = (S.alvos||[]).slice();
+    if(!a.length){ var c=el('div','card'); c.appendChild(el('div','vazio','Nenhum alvo cadastrado.')); alvo.appendChild(c); return; }
+    a.sort(function(x,y){
+      return (x.ativo===y.ativo ? 0 : (x.ativo ? -1 : 1))
+        || (Number(x.prioridade)||99) - (Number(y.prioridade)||99);
+    });
+    var rol = el('div','rolagem'); var t = el('table');
+    var tr = el('tr');
+    [['Nicho',0],['Cidade',0],['Estado',0],['Capturados',1],['Última busca',1],['Vazias seguidas',1]].forEach(function(h){
+      tr.appendChild(el('th', h[1]?'n':null, h[0]));
+    });
+    var th = el('thead'); th.appendChild(tr); t.appendChild(th);
+    var tb = el('tbody');
+    a.forEach(function(r){
+      var row = el('tr');
+      row.appendChild(el('td', null, r.nicho || '–'));
+      row.appendChild(el('td', null, r.cidade || '–'));
+      var tdE = el('td');
+      if(r.esgotado) tdE.appendChild(estado('serio','Esgotado'));
+      else if(!r.ativo) tdE.appendChild(estado('neutro','Desligado'));
+      else tdE.appendChild(estado('ok','Ativo'));
+      row.appendChild(tdE);
+      row.appendChild(el('td','n', num(r.leads_capturados)));
+      row.appendChild(el('td','n', r.ultima_busca ? quando(r.ultima_busca) : 'nunca'));
+      row.appendChild(el('td','n', num(r.vazios_seguidos)));
+      tb.appendChild(row);
+    });
+    t.appendChild(tb); rol.appendChild(t); alvo.appendChild(rol);
+  }
+
+  // ================= OPERAÇÃO =================
+  function pintaOp(){
+    var alvo = q('op-corpo'); alvo.textContent='';
+    if(E.wf && E.exec){ alvo.appendChild(blocoFalha(E.wf,'a operação')); return; }
+
+    if(E.wf){ alvo.appendChild(blocoFalha(E.wf,'os workflows')); }
+    else {
+      var wf = (S.wf||[]).filter(function(w){ return /^Frontstep/.test(w.name||''); });
+      if(wf.length){
+        wf.sort(function(x,y){ return (x.name||'').localeCompare(y.name||''); });
+        var rol = el('div','rolagem'); var t = el('table');
+        var tr = el('tr');
+        ['Workflow','Estado','Mexido'].forEach(function(h,i){ tr.appendChild(el('th', i===2?'n':null, h)); });
+        var th = el('thead'); th.appendChild(tr); t.appendChild(th);
+        var tb = el('tbody');
+        wf.forEach(function(w){
+          var row = el('tr');
+          row.appendChild(el('td', null, (w.name||'').replace(/^Frontstep \| /,'')));
+          var tdE = el('td');
+          tdE.appendChild(w.active ? estado('ok','Ligado') : estado('neutro','Desligado'));
+          row.appendChild(tdE);
+          row.appendChild(el('td','n', quando(w.updatedAt)));
+          tb.appendChild(row);
+        });
+        t.appendChild(tb); rol.appendChild(t); alvo.appendChild(rol);
+      }
+    }
+
+    if(E.exec){ alvo.appendChild(blocoFalha(E.exec,'as execuções')); return; }
+    var ex = S.exec || [];
+    var ruins = ex.filter(function(e){ return e.status && e.status !== 'success' && e.status !== 'running' && e.status !== 'waiting'; });
+    var d = el('div','sub');
+    d.style.marginTop = '10px';
+    if(!ex.length) d.textContent = 'Nenhuma execução recente lida.';
+    else if(!ruins.length) d.textContent = 'Nas últimas ' + ex.length + ' execuções, nenhuma falhou.';
+    else d.textContent = ruins.length + ' de ' + ex.length + ' execuções recentes falharam. A mais nova foi ' + hora(ruins[0].startedAt) + '.';
+    alvo.appendChild(d);
+  }
+
+  // ================= FEED =================
+  var ROTULO_EV = {
+    apify_search:'busca no Apify', leads_captured:'leads capturados', outreach_sent:'primeira mensagem',
+    followup_sent:'follow-up', demo_built:'prévia construída', demo_failed:'prévia falhou',
+    previa_enviada:'prévia enviada', pagamento:'pagamento', venda:'venda'
+  };
+  function pintaFeed(){
+    var alvo = q('feed-corpo'); alvo.textContent='';
+    if(E.ledger){ alvo.className=''; alvo.appendChild(blocoFalha(E.ledger,'a atividade')); return; }
+    alvo.className='card';
+    var l = (S.ledger||[]).slice(0,22);
+    if(!l.length){ alvo.appendChild(el('div','vazio','Sem eventos.')); return; }
+    var ul = el('ul','feed');
+    l.forEach(function(r){
+      var li = el('li');
+      var tm = el('time', null, hora(r.occurred_at || r.createdAt));
+      li.appendChild(tm);
+      var txt = ROTULO_EV[r.event] || r.event || 'evento';
+      if(Number(r.qty)) txt += ' · ' + num(r.qty);
+      if(Number(r.amount_brl)) txt += ' · ' + brl(r.amount_brl);
+      if(r.note) txt += ' · ' + r.note;
+      else if(r.variant) txt += ' · ' + r.variant;
+      li.appendChild(el('div','ev', txt));
+      ul.appendChild(li);
+    });
+    alvo.appendChild(ul);
+  }
+
+  function repinta(){
+    pintaPlacar(); pintaFunil(); pintaBuilder(); pintaNicho(); pintaCaptura(); pintaOp(); pintaFeed(); marcaSelo();
+  }
+
+  // ---- leituras
+  function rows(p){
+    if(!p) return null;
+    if(Array.isArray(p)) return p;
+    if(Array.isArray(p.rows)) return p.rows;
+    if(Array.isArray(p.data)) return p.data;
+    return null;
+  }
+
+  var assinaturas = [];
+  function assina(chave, tool, input){
+    var un = mcp.watchTool(SERVIDOR, tool, input, function(ev){
+      if(ev.type === 'error'){
+        var c = ev.error && ev.error.code;
+        var retira = c==='needs_reauth' || c==='server_not_connected' || c==='blocked_by_policy'
+                  || c==='approval_required' || c==='not_in_manifest' || c==='not_granted'
+                  || c==='capability_disabled' || c==='capability_removed' || c==='consent_required'
+                  || c==='selection_required';
+        E[chave] = ev.error;
+        if(retira) S[chave] = null;
+        repinta();
+        return;
+      }
+      E[chave] = null;
+      var r = rows(ev.result && ev.result.payload);
+      if(r) S[chave] = r;
+      var ca = ev.result && ev.result.cache;
+      carimbo[chave] = ca ? ca.storedAt : Date.now();
+      repinta();
+    }, { refetchInterval: 180000, cache: { staleTime: 60000 } });
+    assinaturas.push(un);
+  }
+
+  function liga(){
+    assina('funil',  'get_data_table_rows', {dataTableId:TAB.funil,  projectId:PROJETO, limit:30,  sortBy:'createdAt:desc'});
+    assina('builds', 'get_data_table_rows', {dataTableId:TAB.builds, projectId:PROJETO, limit:50,  sortBy:'createdAt:desc'});
+    assina('alvos',  'get_data_table_rows', {dataTableId:TAB.alvos,  projectId:PROJETO, limit:50});
+    assina('ledger', 'get_data_table_rows', {dataTableId:TAB.ledger, projectId:PROJETO, limit:200, sortBy:'createdAt:desc'});
+    assina('wf',     'search_workflows', {limit:30});
+    assina('exec',   'search_workflow_executions', {limit:40});
+  }
+
+  q('btn-rec').addEventListener('click', function(){
+    if(!mcp){ return; }
+    q('selo').textContent = 'Atualizando…';
+    mcp.invalidate(SERVIDOR).catch(function(){});
+  });
+
+  repinta();
+
+  (async function(){
+    try { mcp = await (window.claude && window.claude.use ? window.claude.use('mcp') : null); } catch(e){ mcp = null; }
+    if(!mcp){
+      q('selo').textContent = 'Sem acesso ao conector do n8n nesta visualização.';
+      q('btn-rec').disabled = true;
+      ['funil-corpo','builder-corpo','nicho-corpo','captura-corpo','op-corpo','feed-corpo'].forEach(function(id){
+        var n = q(id); n.textContent=''; n.className='';
+        n.appendChild(blocoFalha({code:'not_granted'}, 'os dados'));
+      });
+      return;
+    }
+    liga();
+  })();
+})();
+</script>

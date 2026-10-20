@@ -1,0 +1,12 @@
+{
+  "steps": [
+    { "action": "click", "selector": "[data-testid='adicionar-prato-da-casa']" },
+    { "action": "click", "selector": "[data-testid='adicionar-prato-da-casa']" },
+    { "action": "click", "selector": "[data-testid='adicionar-suco-de-laranja']" },
+    { "action": "click", "selector": "[aria-label='Remover um Prato da casa do pedido']" }
+  ],
+  "assertions": [
+    { "kind": "text", "selector": "[data-testid='pedido-total']", "includes": "R$ 47,00" },
+    { "kind": "attribute", "selector": "[data-testid='pedido-whatsapp']", "name": "href", "includes": "47" }
+  ]
+}

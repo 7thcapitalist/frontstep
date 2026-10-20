@@ -1,0 +1,14 @@
+{
+  "steps":[
+    {"action":"fill","selector":"[data-testid='triagem-servico']","value":"Suporte em alumínio"},
+    {"action":"select","selector":"[data-testid='triagem-material']","value":"aluminio"},
+    {"action":"fill","selector":"[data-testid='triagem-quantidade']","value":"120"},
+    {"action":"fill","selector":"[data-testid='triagem-prazo']","value":"2027-04-30"}
+  ],
+  "assertions":[
+    {"kind":"visible","selector":"[data-feature='triagem']"},
+    {"kind":"text","selector":"[data-testid='triagem-resumo']","includes":"120"},
+    {"kind":"text","selector":"[data-testid='triagem-resumo']","includes":"alumínio"},
+    {"kind":"attribute","selector":"[data-testid='triagem-whatsapp']","name":"href","includes":"wa.me/5500000000000"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          { "type": "command", "command": "node /home/frontstep/worker/skill-hook.mjs", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}

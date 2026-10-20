@@ -1,0 +1,152 @@
+#!/usr/bin/env node
+// Serves completed local examples and a small index. Never deploys or accepts writes.
+import { createServer } from 'node:http';
+import { readFile, readdir, realpath, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const examplesRoot = path.join(here, 'examples');
+const jobsRoot = path.join(here, 'jobs');
+const catalog = JSON.parse(await readFile(path.join(examplesRoot, 'catalog.json'), 'utf8'));
+const catalogBriefs = new Map(catalog.map(entry => [entry.brief, entry]));
+const port = Number(process.env.FRONTSTEP_EXAMPLES_PORT || 4191);
+const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.ico': 'image/x-icon', '.avif': 'image/avif', '.gif': 'image/gif' };
+const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+const criteria = ['artDirection', 'typography', 'composition', 'imagery', 'motion', 'interaction', 'responsive'];
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+async function fileInside(root, requested) {
+  const canonicalRoot = await realpath(root).catch(() => null);
+  if (!canonicalRoot) return null;
+  const target = path.resolve(root, requested);
+  const canonical = await realpath(target).catch(() => null);
+  if (!canonical || !canonical.startsWith(canonicalRoot + path.sep)) return null;
+  const info = await stat(canonical).catch(() => null);
+  return info?.isFile() ? canonical : null;
+}
+
+async function publicDigest(root) {
+  const hash = createHash('sha256');
+  async function walk(folder, prefix = '') {
+    for (const entry of (await readdir(folder, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+      const relative = prefix + entry.name;
+      if (entry.isDirectory()) await walk(path.join(folder, entry.name), relative + '/');
+      else if (entry.isFile()) {
+        hash.update(relative + '\0');
+        hash.update(await readFile(path.join(folder, entry.name)));
+      }
+    }
+  }
+  await walk(root);
+  return hash.digest('hex');
+}
+
+async function approvedAutomatic() {
+  const selected = new Map();
+  const canonicalJobs = await realpath(jobsRoot).catch(() => null);
+  if (!canonicalJobs) return selected;
+  for (const entry of await readdir(jobsRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !uuid.test(entry.name)) continue;
+    const dir = path.join(jobsRoot, entry.name);
+    if (await realpath(dir).catch(() => null) !== path.join(canonicalJobs, entry.name)) continue;
+    const jobFile = await fileInside(dir, 'job.json');
+    if (!jobFile) continue;
+    const job = await readFile(jobFile, 'utf8').then(JSON.parse).catch(() => null);
+    if (!job || job.id !== entry.name || job.state !== 'succeeded' || job.qa?.passed !== true ||
+      job.visual?.passed !== true || !(job.visual.score > 9) ||
+      !criteria.every(key => Number.isFinite(job.visual.criteria?.[key]) && job.visual.criteria[key] >= 8.5) ||
+      job.motion?.signatureEvidence?.hasMeaningfulChange !== true ||
+      !/^[0-9a-f]{64}$/.test(job.publicSha256 || '') ||
+      typeof job.pipelineVersion !== 'string' || !job.pipelineVersion ||
+      job.brief?.synthetic_fixture !== true) continue;
+    const catalogEntry = catalogBriefs.get(job.brief.slug);
+    if (!catalogEntry) continue;
+    const publicRoot = path.join(dir, 'site', 'public');
+    const canonicalDir = await realpath(dir);
+    const canonicalPublic = await realpath(publicRoot).catch(() => null);
+    const canonicalQa = await realpath(path.join(dir, 'qa')).catch(() => null);
+    if (!canonicalPublic?.startsWith(canonicalDir + path.sep) || !canonicalQa?.startsWith(canonicalDir + path.sep)) continue;
+    const index = await fileInside(publicRoot, 'index.html');
+    const shot = await fileInside(path.join(dir, 'qa'), 'desktop.png');
+    if (!index || !shot) continue;
+    if (await publicDigest(publicRoot).catch(() => null) !== job.publicSha256) continue;
+    const timestamp = Date.parse(job.completedAt || job.createdAt || '') || 0;
+    if (!selected.has(catalogEntry.brief) || timestamp > selected.get(catalogEntry.brief).timestamp) {
+      selected.set(catalogEntry.brief, { id: job.id, entry: catalogEntry, timestamp, dir });
+    }
+  }
+  return selected;
+}
+
+const server = createServer(async (req, res) => {
+  try {
+    if (req.method !== 'GET') { res.writeHead(405).end(); return; }
+    const pathname = decodeURIComponent(new URL(req.url, `http://127.0.0.1:${port}`).pathname);
+    if (pathname === '/') {
+      const ready = [];
+      for (const entry of catalog) if (/^[a-z0-9-]+$/.test(entry.slug)) {
+        const info = await stat(path.join(examplesRoot, entry.slug, 'public', 'index.html')).catch(() => null);
+        const shot = await stat(path.join(examplesRoot, entry.slug, 'qa', 'desktop.png')).catch(() => null);
+        const qa = await readFile(path.join(examplesRoot, entry.slug, 'qa', 'qa-result.json'), 'utf8').then(JSON.parse).catch(() => null);
+        const html = info?.isFile() ? await readFile(path.join(examplesRoot, entry.slug, 'public', 'index.html'), 'utf8') : '';
+        if (info?.isFile() && shot?.isFile() && qa?.passed === true && !/(?:src|href)=["']\/(?!\/)/i.test(html)) ready.push(entry);
+      }
+      const cards = ready.map((entry, index) => `<a class="card" href="/examples/${entry.slug}/"><span class="card-image"><img src="/thumb/${entry.slug}.png" alt="Captura da prévia ${escape(entry.name)}" loading="eager"></span><span class="card-meta"><small>${escape(entry.label.toUpperCase())} / ${String(index + 1).padStart(2, '0')}</small><b>${escape(entry.name)}</b><strong>Explorar site <span aria-hidden="true">↗</span></strong></span></a>`).join('');
+      const approved = await approvedAutomatic();
+      const automatic = catalog.map(entry => approved.get(entry.brief)).filter(Boolean);
+      const automaticCards = automatic.map(({ id, entry }) => `<a class="card auto-card" href="/automatic/${id}/"><span class="card-image"><img src="/automatic-thumb/${id}.png" alt="Captura do site automático ${escape(entry.name)}" loading="lazy"></span><span class="card-meta"><small>GERAÇÃO AUTOMÁTICA · ${escape(entry.label.toUpperCase())}</small><b>${escape(entry.name)}</b><span class="review-note">Revisão interna · QA e critérios visuais aprovados</span><strong>Explorar site <span aria-hidden="true">↗</span></strong></span></a>`).join('');
+      res.writeHead(200, { 'content-type': mime['.html'], 'x-content-type-options': 'nosniff', 'cache-control': 'no-store' });
+      res.end(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Frontstep — prévias locais</title><style>
+      :root{color-scheme:light}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f2eee6;color:#1c332d;font:16px/1.5 Arial,sans-serif}header{display:flex;justify-content:space-between;align-items:center;padding:18px clamp(24px,5vw,72px);border-bottom:1px solid #b7c3b9;gap:20px}header b{font-size:18px;letter-spacing:-.06em}header span{font-size:11px;letter-spacing:.1em}main{max-width:1600px;margin:auto;padding:clamp(40px,7vw,108px) clamp(24px,5vw,72px) 110px}.intro{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(230px,.5fr);align-items:end;gap:35px;padding-bottom:55px;border-bottom:1px solid #9fb3a5}.eyebrow,.count{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.eyebrow{color:#9c4d32}h1{font:clamp(60px,10vw,160px)/.86 Georgia,serif;letter-spacing:-.08em;margin:26px 0 0;max-width:10ch}.intro p{margin:0 0 7px;max-width:42ch;color:#41584c}.count{display:flex;justify-content:space-between;margin:24px 0 18px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}.card{display:flex;flex-direction:column;min-width:0;color:inherit;text-decoration:none;background:#e0e4da;overflow:hidden;outline-offset:5px}.card-image{display:block;height:clamp(220px,28vw,400px);overflow:hidden;background:#c3d0c4}.card img{width:100%;height:auto;display:block;transform-origin:top;transition:transform .5s ease}.card-meta{display:grid;gap:6px;padding:20px 22px 24px;min-height:128px}.card small{font-size:10px;letter-spacing:.12em}.card b{font:clamp(24px,2.7vw,38px)/1 Georgia,serif;text-transform:capitalize;letter-spacing:-.045em}.card strong{justify-self:start;font-size:12px;border-bottom:1px solid currentColor}.card:hover img,.card:focus-visible img{transform:scale(1.025)}footer{padding:25px clamp(24px,5vw,72px);border-top:1px solid #b7c3b9;font-size:12px;color:#41584c}@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.intro{grid-template-columns:1fr}.intro p{margin:10px 0 0}}@media(max-width:600px){.grid{grid-template-columns:1fr}.card-image{height:300px}h1{font-size:68px}header span{display:none}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card img{transition:none}}
+      .collection{padding-top:42px}.collection+.collection{margin-top:72px;border-top:1px solid #9fb3a5}.collection-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:24px}.collection-head h2{font:clamp(36px,5vw,68px)/.95 Georgia,serif;letter-spacing:-.06em;margin:7px 0 0}.collection-head p{max-width:46ch;margin:0;color:#41584c;font-size:14px}.count{margin:0 0 18px}.auto-card{background:#e6e2d9}.auto-card .card-image{background:#d3cec3}.review-note{font-size:12px;color:#41584c}.empty{border:1px solid #b7c3b9;padding:28px;color:#41584c;grid-column:1/-1}.badge{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9c4d32;font-weight:700}@media(max-width:900px){.collection-head{display:block}.collection-head p{margin-top:15px}}
+      </style><header><b>frontstep<span aria-hidden="true"> /</span></b><span>ESTÚDIO DE SITES · PRÉVIAS LOCAIS</span></header><main><section class="intro"><div><span class="eyebrow">Biblioteca de demonstrações</span><h1>Cada negócio, uma forma.</h1></div><p>Exemplares fictícios para testar direção visual e funcionalidades. Fotografias licenciadas são identificadas nos próprios sites; não representam negócios reais.</p></section><section class="collection" aria-labelledby="auto-title"><div class="collection-head"><div><span class="badge">Construídos pelo Codex</span><h2 id="auto-title">Geração automática</h2></div><p>Sites gerados automaticamente a partir de briefs fictícios e publicados aqui somente após QA, medição de movimento e revisão visual interna.</p></div><div class="count"><span>APROVADOS · REVISÃO INTERNA</span><span>${automatic.length} / ${catalog.length} FAMÍLIAS</span></div><div class="grid">${automaticCards || '<p class="empty">Nenhum build automático aprovado ainda. A galeria será atualizada conforme os jobs concluírem os critérios de qualidade.</p>'}</div></section><section class="collection" aria-labelledby="manual-title"><div class="collection-head"><div><span class="badge">Referências de design</span><h2 id="manual-title">Exemplares manuais</h2></div><p>Exemplos locais criados para estudar direção visual e funcionalidades. Eles não representam resultados da geração automática.</p></div><div class="count"><span>EXEMPLARES PARA EXPLORAR</span><span>${ready.length} / ${catalog.length} FAMÍLIAS</span></div><div class="grid">${cards || '<p class="empty">Nenhum exemplar manual concluído.</p>'}</div></section></main><footer>Frontstep · Ambiente local de avaliação visual. Nenhum formulário envia dados reais.</footer></html>`);
+      return;
+    }
+    const automaticThumb = pathname.match(/^\/automatic-thumb\/([0-9a-f-]{36})\.png$/);
+    if (automaticThumb) {
+      const approved = await approvedAutomatic();
+      const job = [...approved.values()].find(item => item.id === automaticThumb[1]);
+      const target = job && await fileInside(path.join(job.dir, 'qa'), 'desktop.png');
+      if (!target) { res.writeHead(404).end(); return; }
+      res.writeHead(200, { 'content-type': mime['.png'], 'x-content-type-options': 'nosniff', 'cache-control': 'no-store' });
+      res.end(await readFile(target)); return;
+    }
+    const automaticSite = pathname.match(/^\/automatic\/([0-9a-f-]{36})\/(.*)$/);
+    if (automaticSite) {
+      const approved = await approvedAutomatic();
+      const job = [...approved.values()].find(item => item.id === automaticSite[1]);
+      if (!job) { res.writeHead(404).end(); return; }
+      const requested = automaticSite[2] || 'index.html';
+      const target = await fileInside(path.join(job.dir, 'site', 'public'), requested);
+      const extension = path.extname(target || '').toLowerCase();
+      const allowed = ['.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.webp', '.svg', '.woff2', '.json', '.ico', '.avif', '.gif'];
+      if (!target || !allowed.includes(extension)) { res.writeHead(404).end(); return; }
+      res.writeHead(200, { 'content-type': mime[extension] || 'application/octet-stream', 'x-content-type-options': 'nosniff', 'cache-control': 'no-store' });
+      res.end(await readFile(target)); return;
+    }
+    const thumb = pathname.match(/^\/thumb\/([a-z0-9-]+)\.png$/);
+    if (thumb) {
+      const target = path.join(examplesRoot, thumb[1], 'qa', 'desktop.png');
+      const info = await stat(target).catch(() => null);
+      if (!info?.isFile()) { res.writeHead(404).end(); return; }
+      const canonical = await realpath(target);
+      if (!canonical.startsWith(examplesRoot + path.sep)) { res.writeHead(403).end(); return; }
+      res.writeHead(200, { 'content-type': mime['.png'], 'x-content-type-options': 'nosniff' }); res.end(await readFile(target)); return;
+    }
+    const match = pathname.match(/^\/examples\/([a-z0-9-]+)\/(.*)$/);
+    if (!match) { res.writeHead(404).end(); return; }
+    const root = path.join(examplesRoot, match[1], 'public');
+    const requested = match[2] || 'index.html';
+    const target = path.resolve(root, requested);
+    if (!target.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
+    const info = await stat(target).catch(() => null);
+    if (!info?.isFile()) { res.writeHead(404).end(); return; }
+    const canonical = await realpath(target);
+    if (!canonical.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
+    res.writeHead(200, { 'content-type': mime[path.extname(target).toLowerCase()] || 'application/octet-stream', 'x-content-type-options': 'nosniff' });
+    res.end(await readFile(target));
+  } catch (error) { console.error('Gallery request failed:', error); res.writeHead(500, { 'content-type': 'text/plain' }); res.end('Gallery request failed'); }
+});
+server.listen(port, '127.0.0.1', () => console.log(`Frontstep examples: http://127.0.0.1:${port}/`));

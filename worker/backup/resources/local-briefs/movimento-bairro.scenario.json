@@ -1,0 +1,12 @@
+{
+  "steps":[
+    {"action":"select","selector":"[data-testid='avaliacao-objetivo']","value":"mobilidade"},
+    {"action":"select","selector":"[data-testid='avaliacao-ritmo']","value":"duas"}
+  ],
+  "assertions":[
+    {"kind":"visible","selector":"[data-feature='avaliacao']"},
+    {"kind":"text","selector":"[data-testid='avaliacao-recomendacao']","includes":"Yoga suave"},
+    {"kind":"attribute","selector":"[data-testid='avaliacao-whatsapp']","name":"href","includes":"wa.me/5500000000000"},
+    {"kind":"attribute","selector":"[data-testid='avaliacao-whatsapp']","name":"href","includes":"mobilidade"}
+  ]
+}

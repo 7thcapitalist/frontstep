@@ -1,0 +1,220 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "code": "TITLE",
+      "passed": true,
+      "detail": "Ateliê Aurora — um tempo para o seu cabelo",
+      "viewport": "desktop"
+    },
+    {
+      "code": "LANG",
+      "passed": true,
+      "detail": "pt-BR",
+      "viewport": "desktop"
+    },
+    {
+      "code": "H1",
+      "passed": true,
+      "detail": "1 h1 elements",
+      "viewport": "desktop"
+    },
+    {
+      "code": "OVERFLOW",
+      "passed": true,
+      "detail": "0px horizontal overflow",
+      "viewport": "desktop"
+    },
+    {
+      "code": "ANCHORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FORM_LABELS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "BUTTON_NAMES",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "IMAGE_ALT",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "IMAGES_LOAD",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "BRIEF_SERVICES",
+      "passed": true,
+      "detail": "3 service names visible",
+      "viewport": "desktop"
+    },
+    {
+      "code": "MEDIA_SOURCE_CREDITS",
+      "passed": true,
+      "detail": "2 stock photo credits visible",
+      "viewport": "desktop"
+    },
+    {
+      "code": "DEMO_DISCLOSURE",
+      "passed": true,
+      "detail": "Visible fictitious/demo disclosure",
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_PRESENT",
+      "passed": true,
+      "detail": "agendamento: 1 matching regions",
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_SCENARIO",
+      "passed": true,
+      "detail": "2 steps, 4 assertions",
+      "viewport": "desktop"
+    },
+    {
+      "code": "CONSOLE_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "HTTP_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_NO_JS_FALLBACK",
+      "passed": true,
+      "detail": "Sem JavaScript, consulte serviços e valores acima. O contato é apenas demonstrativo; nenhum agendamento pode ser solicitado neste site.",
+      "viewport": "desktop"
+    },
+    {
+      "code": "TITLE",
+      "passed": true,
+      "detail": "Ateliê Aurora — um tempo para o seu cabelo",
+      "viewport": "mobile"
+    },
+    {
+      "code": "LANG",
+      "passed": true,
+      "detail": "pt-BR",
+      "viewport": "mobile"
+    },
+    {
+      "code": "H1",
+      "passed": true,
+      "detail": "1 h1 elements",
+      "viewport": "mobile"
+    },
+    {
+      "code": "OVERFLOW",
+      "passed": true,
+      "detail": "0px horizontal overflow",
+      "viewport": "mobile"
+    },
+    {
+      "code": "ANCHORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FORM_LABELS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "BUTTON_NAMES",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "IMAGE_ALT",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "IMAGES_LOAD",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "BRIEF_SERVICES",
+      "passed": true,
+      "detail": "3 service names visible",
+      "viewport": "mobile"
+    },
+    {
+      "code": "MEDIA_SOURCE_CREDITS",
+      "passed": true,
+      "detail": "2 stock photo credits visible",
+      "viewport": "mobile"
+    },
+    {
+      "code": "DEMO_DISCLOSURE",
+      "passed": true,
+      "detail": "Visible fictitious/demo disclosure",
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_PRESENT",
+      "passed": true,
+      "detail": "agendamento: 1 matching regions",
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_SCENARIO",
+      "passed": true,
+      "detail": "2 steps, 4 assertions",
+      "viewport": "mobile"
+    },
+    {
+      "code": "CONSOLE_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "HTTP_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_NO_JS_FALLBACK",
+      "passed": true,
+      "detail": "Sem JavaScript, consulte serviços e valores acima. O contato é apenas demonstrativo; nenhum agendamento pode ser solicitado neste site.",
+      "viewport": "mobile"
+    }
+  ],
+  "screenshots": {
+    "desktop": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\atelie-aurora\\qa\\desktop.png",
+    "desktopFeature": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\atelie-aurora\\qa\\desktop-feature.png",
+    "desktopNoJs": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\atelie-aurora\\qa\\desktop-nojs.png",
+    "mobile": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\atelie-aurora\\qa\\mobile.png",
+    "mobileFeature": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\atelie-aurora\\qa\\mobile-feature.png",
+    "mobileNoJs": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\atelie-aurora\\qa\\mobile-nojs.png"
+  },
+  "startedAt": "2026-10-16T22:23:15.162Z",
+  "finishedAt": "2026-10-16T22:23:19.464Z",
+  "exitCode": 0
+}

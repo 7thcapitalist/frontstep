@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+import { readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import path from 'node:path';
+
+const args = process.argv.slice(2);
+const fresh = args.includes('--new');
+const [briefFile, scenarioFile] = args.filter(arg => arg !== '--new');
+if (!briefFile) {
+  console.error('Usage: node local-factory/submit.mjs <brief.json> [scenario.json] [--new]');
+  process.exit(2);
+}
+const brief = JSON.parse(await readFile(path.resolve(briefFile), 'utf8'));
+const scenario = scenarioFile ? JSON.parse(await readFile(path.resolve(scenarioFile), 'utf8')) : undefined;
+const url = `http://127.0.0.1:${process.env.FRONTSTEP_LOCAL_PORT || 4178}/jobs`;
+const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ brief, scenario, ...(fresh ? { idempotencyKey: `manual-${randomUUID()}` } : {}) }) });
+console.log(JSON.stringify(await res.json(), null, 2));
+if (!res.ok) process.exitCode = 1;

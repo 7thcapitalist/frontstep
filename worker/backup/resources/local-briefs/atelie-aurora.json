@@ -1,0 +1,24 @@
+{
+  "mode": "demo", "language": "pt-BR", "slug": "atelie-aurora", "synthetic_fixture": true,
+  "business": {
+    "name": "Ateliê Aurora", "niche": "salão de beleza", "city": "Campinas", "neighborhood": "Barão Geraldo",
+    "one_liner": "Um tempo para cuidar do seu cabelo com calma",
+    "services": [
+      {"name":"Corte", "price": 65, "description":"Consulta breve sobre formato e manutenção. Valor fictício."},
+      {"name":"Hidratação", "price": 80, "description":"Cuidado capilar em sessão. Valor fictício."},
+      {"name":"Escova", "price": 55, "description":"Finalização para o dia a dia. Valor fictício."}
+    ],
+    "audience": "Pessoas do bairro que desejam conhecer os serviços e pedir uma conversa de agendamento"
+  },
+  "contact": {"whatsapp":"5500000000000", "phone":null, "email":null, "address":null, "maps_url":null, "hours":null},
+  "google": {"rating":null, "review_count":null, "reviews":[]},
+  "brand": {"logo_url":null, "colors_seen":["#4D3543","#D9B9C7","#F7F1ED","#B6775C"], "vibe":"íntimo, artesanal e leve", "style_hint":"tipografia editorial, formas curvas e detalhes inspirados em mechas; evitar fotos de cabelo que não sejam do próprio salão"},
+  "media": {"photos":[
+    {"local_path":"beleza-tesouras-pexels-30807432.jpg","provenance":"licensed_stock","caption":"Referência visual de ferramentas de salão; não pertence ao Ateliê Aurora fictício.","source_url":"https://www.pexels.com/photo/professional-hairdressing-scissors-in-salon-setup-30807432/","license":"Pexels License","credit":"James Collington / Pexels"},
+    {"local_path":"beleza-interior-referencia-pexels-7750098.jpg","provenance":"licensed_stock","caption":"Referência visual de interior; não retrata o salão fictício.","source_url":"https://www.pexels.com/photo/photo-of-the-interior-of-a-salon-7750098/","license":"Pexels License","credit":"Max Vakhtbovych / Pexels"}
+  ]},
+  "premium_feature": {"id":"agendamento", "description":"O visitante escolhe serviço e turno preferido (manhã ou tarde) e revisa a intenção antes de abrir uma mensagem preparada para o contato fictício. Não mostrar calendário ou horários inventados nem afirmar reserva confirmada. Expor data-testid agendamento-servico, agendamento-turno, agendamento-resumo e agendamento-whatsapp."},
+  "demo_constraints": {"fictitious_notice":"Demonstração fictícia. Salão, preços e contato são exemplos; nenhum agendamento será recebido.", "no_real_bookings":true, "whatsapp_behavior":"Inspecionar href em teste; nunca navegar ou enviar mensagem.", "fallback":"Com JavaScript desligado, mostrar [data-feature-fallback] com instrução de consulta manual e contato de demonstração."},
+  "content_notes": "As fotos licenciadas são referências visuais de ferramentas e interior, não trabalhos, profissionais ou espaço do negócio. Legendar explicitamente como referências visuais; não fingir portfólio. Omitir endereço por não existir. Explicar que os preços são exemplos.",
+  "conversation_notes": "Fixture sintética local. Não inventar equipe, fotos de resultados, avaliações, vagas ou endereço.", "revisions":[], "domain":null
+}

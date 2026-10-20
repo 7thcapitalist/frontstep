@@ -1,0 +1,9 @@
+{
+  "paused": true,
+  "model": null,
+  "effort": "low",
+  "timeout_seconds": 60,
+  "max_prompt_chars": 240000,
+  "max_artifact_chars": 200000,
+  "evidence_max_age_seconds": 60
+}

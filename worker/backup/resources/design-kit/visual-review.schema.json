@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["score", "passed", "criteria", "strengths", "issues", "summary", "motionEvidence"],
+  "properties": {
+    "score": { "type": "number", "minimum": 0, "maximum": 10 },
+    "criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artDirection", "typography", "composition", "imagery", "motion", "interaction", "responsive"],
+      "properties": {
+        "artDirection": { "type": "number", "minimum": 0, "maximum": 10 },
+        "typography": { "type": "number", "minimum": 0, "maximum": 10 },
+        "composition": { "type": "number", "minimum": 0, "maximum": 10 },
+        "imagery": { "type": "number", "minimum": 0, "maximum": 10 },
+        "motion": { "type": "number", "minimum": 0, "maximum": 10 },
+        "interaction": { "type": "number", "minimum": 0, "maximum": 10 },
+        "responsive": { "type": "number", "minimum": 0, "maximum": 10 }
+      }
+    },
+    "passed": { "type": "boolean" },
+    "strengths": { "type": "array", "items": { "type": "string" } },
+    "issues": { "type": "array", "items": { "type": "string" } },
+    "summary": { "type": "string" },
+    "motionEvidence": { "type": "string" }
+  }
+}

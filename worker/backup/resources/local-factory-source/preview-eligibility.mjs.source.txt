@@ -1,0 +1,19 @@
+import { assessReview } from './design-resources.mjs';
+
+// Historical successes must be revalidated before they can become client previews.
+export async function previewEligibility(job, root, digest) {
+  if (job.state !== 'succeeded') return { ok: false, reason: 'Preview unavailable' };
+  if (job.qa?.passed !== true) return { ok: false, reason: 'Functional evidence missing' };
+  try {
+    if (!assessReview(job.visual || {}).passed) return { ok: false, reason: 'Current visual threshold not met' };
+  } catch { return { ok: false, reason: 'Calibrated visual evidence missing' }; }
+  if (job.motion?.signatureEvidence?.hasMeaningfulChange !== true || job.motion?.reducedMotion !== true || job.motion?.mobileReducedMotion?.matches !== true
+    || (job.motion?.hiddenMeaningful || []).length || (job.motion?.mobileReducedMotion?.hiddenMeaningful || []).length || (job.motion?.pageErrors || []).length) {
+    return { ok: false, reason: 'Motion evidence missing or failed' };
+  }
+  if (!/^[a-f0-9]{64}$/i.test(job.publicSha256 || '')) return { ok: false, reason: 'Validated artifact digest missing' };
+  try {
+    if (await digest(root) !== job.publicSha256) return { ok: false, reason: 'Preview files changed after validation; rerun QA and review' };
+  } catch { return { ok: false, reason: 'Validated artifact unavailable' }; }
+  return { ok: true };
+}

@@ -1,0 +1,11 @@
+{
+  "steps":[
+    {"action":"select","selector":"[data-testid='agendamento-turno']","value":"manha"},
+    {"action":"select","selector":"[data-testid='agendamento-tipo']","value":"primeira_conversa"}
+  ],
+  "assertions":[
+    {"kind":"visible","selector":"[data-feature='agendamento']"},
+    {"kind":"text","selector":"[data-testid='agendamento-resumo']","includes":"manhã"},
+    {"kind":"attribute","selector":"[data-testid='agendamento-whatsapp']","name":"href","includes":"wa.me/5500000000000"}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "steps":[
+    {"action":"fill","selector":"[data-testid='disponibilidade-entrada']","value":"2027-03-12"},
+    {"action":"fill","selector":"[data-testid='disponibilidade-saida']","value":"2027-03-15"},
+    {"action":"fill","selector":"[data-testid='disponibilidade-hospedes']","value":"2"}
+  ],
+  "assertions":[
+    {"kind":"visible","selector":"[data-feature='disponibilidade']"},
+    {"kind":"text","selector":"[data-testid='disponibilidade-resumo']","includes":"12/03/2027"},
+    {"kind":"text","selector":"[data-testid='disponibilidade-resumo']","includes":"15/03/2027"},
+    {"kind":"attribute","selector":"[data-testid='disponibilidade-whatsapp']","name":"href","includes":"wa.me/5500000000000"}
+  ]
+}

@@ -1,0 +1,2 @@
+# Keep recovered resource bytes and their SHA-256 stable across Windows checkouts.
+resources/** -text

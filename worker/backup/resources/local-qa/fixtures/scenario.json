@@ -1,0 +1,9 @@
+{
+  "steps": [
+    {"action":"fill","selector":"#nome","value":"Ana Teste"},
+    {"action":"click","selector":"#enviar"}
+  ],
+  "assertions": [
+    {"kind":"text","selector":"#resumo","includes":"Ana Teste"}
+  ]
+}

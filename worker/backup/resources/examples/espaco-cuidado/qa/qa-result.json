@@ -1,0 +1,208 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "code": "TITLE",
+      "passed": true,
+      "detail": "Espaço Cuidado — protótipo de interface",
+      "viewport": "desktop"
+    },
+    {
+      "code": "LANG",
+      "passed": true,
+      "detail": "pt-BR",
+      "viewport": "desktop"
+    },
+    {
+      "code": "H1",
+      "passed": true,
+      "detail": "1 h1 elements",
+      "viewport": "desktop"
+    },
+    {
+      "code": "OVERFLOW",
+      "passed": true,
+      "detail": "0px horizontal overflow",
+      "viewport": "desktop"
+    },
+    {
+      "code": "ANCHORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FORM_LABELS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "BUTTON_NAMES",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "IMAGE_ALT",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "IMAGES_LOAD",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "BRIEF_SERVICES",
+      "passed": true,
+      "detail": "1 service names visible",
+      "viewport": "desktop"
+    },
+    {
+      "code": "DEMO_DISCLOSURE",
+      "passed": true,
+      "detail": "Visible fictitious/demo disclosure",
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_PRESENT",
+      "passed": true,
+      "detail": "agendamento: 1 matching regions",
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_SCENARIO",
+      "passed": true,
+      "detail": "2 steps, 3 assertions",
+      "viewport": "desktop"
+    },
+    {
+      "code": "CONSOLE_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "HTTP_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_NO_JS_FALLBACK",
+      "passed": true,
+      "detail": "Sem JavaScript: este é um protótipo fictício de interface de saúde. Não há clínica, profissional registrado nem contato válido para pacientes.",
+      "viewport": "desktop"
+    },
+    {
+      "code": "TITLE",
+      "passed": true,
+      "detail": "Espaço Cuidado — protótipo de interface",
+      "viewport": "mobile"
+    },
+    {
+      "code": "LANG",
+      "passed": true,
+      "detail": "pt-BR",
+      "viewport": "mobile"
+    },
+    {
+      "code": "H1",
+      "passed": true,
+      "detail": "1 h1 elements",
+      "viewport": "mobile"
+    },
+    {
+      "code": "OVERFLOW",
+      "passed": true,
+      "detail": "0px horizontal overflow",
+      "viewport": "mobile"
+    },
+    {
+      "code": "ANCHORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FORM_LABELS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "BUTTON_NAMES",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "IMAGE_ALT",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "IMAGES_LOAD",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "BRIEF_SERVICES",
+      "passed": true,
+      "detail": "1 service names visible",
+      "viewport": "mobile"
+    },
+    {
+      "code": "DEMO_DISCLOSURE",
+      "passed": true,
+      "detail": "Visible fictitious/demo disclosure",
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_PRESENT",
+      "passed": true,
+      "detail": "agendamento: 1 matching regions",
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_SCENARIO",
+      "passed": true,
+      "detail": "2 steps, 3 assertions",
+      "viewport": "mobile"
+    },
+    {
+      "code": "CONSOLE_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "HTTP_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_NO_JS_FALLBACK",
+      "passed": true,
+      "detail": "Sem JavaScript: este é um protótipo fictício de interface de saúde. Não há clínica, profissional registrado nem contato válido para pacientes.",
+      "viewport": "mobile"
+    }
+  ],
+  "screenshots": {
+    "desktop": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\espaco-cuidado\\qa\\desktop.png",
+    "desktopFeature": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\espaco-cuidado\\qa\\desktop-feature.png",
+    "desktopNoJs": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\espaco-cuidado\\qa\\desktop-nojs.png",
+    "mobile": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\espaco-cuidado\\qa\\mobile.png",
+    "mobileFeature": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\espaco-cuidado\\qa\\mobile-feature.png",
+    "mobileNoJs": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\espaco-cuidado\\qa\\mobile-nojs.png"
+  },
+  "startedAt": "2026-10-16T22:23:10.237Z",
+  "finishedAt": "2026-10-16T22:23:14.234Z",
+  "exitCode": 0
+}

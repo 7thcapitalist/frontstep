@@ -1,0 +1,84 @@
+{
+  "mode": "demo",
+  "language": "pt-BR",
+  "slug": "restaurante-praca-do-sol",
+  "synthetic_fixture": true,
+  "business": {
+    "name": "Mesa da Praça",
+    "niche": "restaurante de almoço",
+    "city": "Campinas",
+    "neighborhood": "Taquaral",
+    "one_liner": "Monte um almoço simples do seu jeito",
+    "services": [
+      { "name": "Prato da casa", "price": 38, "description": "Arroz, feijão, legumes e frango grelhado. Preço fictício para demonstração." },
+      { "name": "Prato vegetariano", "price": 36, "description": "Arroz, feijão, legumes e abóbora assada. Preço fictício para demonstração." },
+      { "name": "Suco de laranja", "price": 9, "description": "Copo de 300 ml. Preço fictício para demonstração." },
+      { "name": "Água sem gás", "price": 5, "description": "Garrafa de 500 ml. Preço fictício para demonstração." }
+    ],
+    "audience": "Pessoas que querem escolher o almoço rapidamente no celular"
+  },
+  "contact": {
+    "whatsapp": "5500000000000",
+    "phone": null,
+    "email": null,
+    "address": null,
+    "maps_url": null,
+    "hours": null
+  },
+  "google": { "rating": null, "review_count": null, "reviews": [] },
+  "brand": {
+    "logo_url": null,
+    "colors_seen": ["#772F24", "#E5A947", "#FAF4E7", "#283B2C"],
+    "vibe": "acolhedor, cotidiano e direto",
+    "style_hint": "cardápio como objeto editorial; fotografia real licenciada apresentada como referência visual, nunca como prato do restaurante fictício; não usar imagem gerada"
+  },
+  "media": {
+    "photos": [
+      {
+        "local_path": "mesa-da-praca/editorial-real.jpg",
+        "provenance": "licensed_stock",
+        "caption": "Fotografia de referência culinária, não é um prato do restaurante fictício.",
+        "source_url": "https://www.pexels.com/photo/varied-brazilian-cuisine-on-wooden-table-28992209/",
+        "license": "Pexels License",
+        "credit": "pedro furtado / Pexels"
+      },
+      {
+        "local_path": "mesa-da-praca/mesa-real.jpg",
+        "provenance": "licensed_stock",
+        "caption": "Fotografia de referência de comida brasileira, não é do restaurante fictício.",
+        "source_url": "https://www.pexels.com/photo/meals-in-frying-pans-on-wooden-table-19781592/",
+        "license": "Pexels License",
+        "credit": "Lucas Andrade / Pexels"
+      },
+      {
+        "local_path": "mesa-da-praca/almoco-real.jpg",
+        "provenance": "licensed_stock",
+        "caption": "Fotografia de referência de almoço brasileiro, não é do restaurante fictício.",
+        "source_url": "https://www.pexels.com/photo/delicious-brazilian-rice-and-bean-meal-34284708/",
+        "license": "Pexels License",
+        "credit": "joao Abel / Pexels"
+      },
+      {
+        "local_path": "mesa-da-praca/suco-real.jpg",
+        "provenance": "licensed_stock",
+        "caption": "Fotografia de referência de suco de laranja, não é do restaurante fictício.",
+        "source_url": "https://www.pexels.com/photo/fresh-orange-juice-pouring-into-glass-bottle-5946803/",
+        "license": "Pexels License",
+        "credit": "Charlotte May / Pexels"
+      }
+    ]
+  },
+  "premium_feature": {
+    "id": "pedido",
+    "description": "Cardápio interativo com quantidades inteiras, remoção, subtotal por item e total em BRL. O resumo de WhatsApp deve listar cada item, quantidade, preço unitário, subtotal e total. Pedido vazio não pode prosseguir. Não simular confirmação, pagamento, entrega ou disponibilidade."
+  },
+  "demo_constraints": {
+    "fictitious_notice": "Demonstração fictícia. Restaurante, preços e contato são exemplos; nenhum pedido será recebido.",
+    "whatsapp_behavior": "O link pode ser montado para inspeção automatizada, mas o teste local nunca deve navegar ao WhatsApp nem enviar mensagens.",
+    "no_backend": true,
+    "no_real_orders": true
+  },
+  "conversation_notes": "Brief sintético criado para testar a fábrica local. Os preços são apenas fixtures de cálculo. Não inventar horário, endereço, avaliações, promoções, fotos reais ou disponibilidade. Mostrar aviso de demonstração junto do cardápio e no rodapé.",
+  "revisions": [],
+  "domain": null
+}

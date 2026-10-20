@@ -1,0 +1,260 @@
+{
+  "steps": [
+    {
+      "action": "select",
+      "selector": "[data-testid='triagem-assunto']",
+      "value": "trocar_contador"
+    },
+    {
+      "action": "select",
+      "selector": "[data-testid='triagem-estagio']",
+      "value": "empresa_ativa"
+    },
+    {
+      "action": "fill",
+      "selector": "[data-testid='triagem-cidade']",
+      "value": "Campinas"
+    },
+    {
+      "action": "click",
+      "selector": "#review-button"
+    }
+  ],
+  "assertions": [
+    {
+      "kind": "visible",
+      "selector": "[data-feature='triagem']"
+    },
+    {
+      "kind": "text",
+      "selector": "[data-testid='triagem-resumo']",
+      "includes": "Trocar contador"
+    },
+    {
+      "kind": "text",
+      "selector": "[data-testid='triagem-resumo']",
+      "includes": "Empresa ativa"
+    },
+    {
+      "kind": "text",
+      "selector": "[data-testid='triagem-resumo']",
+      "includes": "Campinas"
+    },
+    {
+      "kind": "attribute",
+      "selector": "[data-testid='triagem-whatsapp']",
+      "name": "href",
+      "includes": "wa.me/5500000000000"
+    },
+    {
+      "kind": "attribute",
+      "selector": "[data-testid='triagem-whatsapp']",
+      "name": "href",
+      "includes": "Campinas"
+    },
+    {
+      "kind": "attribute",
+      "selector": "[data-testid='triagem-whatsapp']",
+      "name": "href",
+      "includes": "Vila%20Clara"
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "changed-subject",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#edit-button"
+        },
+        {
+          "action": "select",
+          "selector": "[data-testid='triagem-assunto']",
+          "value": "organizar_rotina"
+        },
+        {
+          "action": "click",
+          "selector": "#review-button"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "text",
+          "selector": "[data-testid='triagem-resumo']",
+          "includes": "Organizar rotina"
+        },
+        {
+          "kind": "text",
+          "selector": "[data-testid='triagem-resumo']",
+          "includes": "Empresa ativa"
+        },
+        {
+          "kind": "text",
+          "selector": "[data-testid='triagem-resumo']",
+          "includes": "Campinas"
+        }
+      ],
+      "captureSelector": "[data-feature='triagem']"
+    },
+    {
+      "name": "message",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "[data-testid='triagem-whatsapp']"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "text",
+          "selector": "#message-preview",
+          "includes": "Organizar rotina"
+        },
+        {
+          "kind": "text",
+          "selector": "#message-preview",
+          "includes": "Campinas"
+        }
+      ],
+      "captureSelector": "#message-preview"
+    },
+    {
+      "name": "city-error",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#edit-button"
+        },
+        {
+          "action": "fill",
+          "selector": "[data-testid='triagem-cidade']",
+          "value": "   "
+        },
+        {
+          "action": "click",
+          "selector": "#review-button"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "attribute",
+          "selector": "[data-testid='triagem-cidade']",
+          "name": "aria-invalid",
+          "equals": "true"
+        }
+      ],
+      "captureSelector": "[data-feature='triagem']"
+    },
+    {
+      "name": "corrected-city",
+      "steps": [
+        {
+          "action": "fill",
+          "selector": "[data-testid='triagem-cidade']",
+          "value": "Valinhos"
+        },
+        {
+          "action": "click",
+          "selector": "#review-button"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "text",
+          "selector": "[data-testid='triagem-resumo']",
+          "includes": "Valinhos"
+        },
+        {
+          "kind": "text",
+          "selector": "[data-testid='triagem-resumo']",
+          "includes": "Organizar rotina"
+        },
+        {
+          "kind": "attribute",
+          "selector": "[data-testid='triagem-whatsapp']",
+          "name": "href",
+          "includes": "Valinhos"
+        }
+      ],
+      "captureSelector": "[data-feature='triagem']"
+    },
+    {
+      "name": "empty",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#edit-button"
+        },
+        {
+          "action": "select",
+          "selector": "[data-testid='triagem-assunto']",
+          "value": ""
+        },
+        {
+          "action": "select",
+          "selector": "[data-testid='triagem-estagio']",
+          "value": ""
+        },
+        {
+          "action": "fill",
+          "selector": "[data-testid='triagem-cidade']",
+          "value": ""
+        },
+        {
+          "action": "click",
+          "selector": "#review-button"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "attribute",
+          "selector": "[data-testid='triagem-assunto']",
+          "name": "aria-invalid",
+          "equals": "true"
+        },
+        {
+          "kind": "attribute",
+          "selector": "[data-testid='triagem-estagio']",
+          "name": "aria-invalid",
+          "equals": "true"
+        },
+        {
+          "kind": "attribute",
+          "selector": "[data-testid='triagem-cidade']",
+          "name": "aria-invalid",
+          "equals": "true"
+        }
+      ],
+      "captureSelector": "[data-feature='triagem']"
+    }
+  ],
+  "motionSteps": [
+    {
+      "action": "click",
+      "selector": "[data-topic=\"trocar_contador\"]",
+      "capture": false
+    },
+    {
+      "action": "click",
+      "selector": "#topic-next"
+    },
+    {
+      "action": "select",
+      "selector": "[data-testid='triagem-estagio']",
+      "value": "empresa_ativa"
+    },
+    {
+      "action": "fill",
+      "selector": "[data-testid='triagem-cidade']",
+      "value": "Campinas"
+    },
+    {
+      "action": "click",
+      "selector": "#review-button"
+    },
+    {
+      "action": "click",
+      "selector": "#back-to-subjects"
+    }
+  ]
+}

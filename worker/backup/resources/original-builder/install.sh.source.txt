@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Copia o repo para os lugares de produção do mini PC.
+#   bash install.sh                 # instala em /home/frontstep (produção)
+#   bash install.sh --dest /tmp/x   # instala num destino de teste (<dest>/.claude/skills/... e <dest>/worker)
+#   bash install.sh --dry-run       # só mostra o que mudaria
+# Não reinicia nada. Não toca em /etc/frontstep-worker.env.
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEST="/home/frontstep"
+OWNER="frontstep"
+DRY=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dest) DEST="${2:?--dest precisa de um caminho}"; shift 2 ;;
+    --dry-run) DRY=1; shift ;;
+    -h|--help) sed -n 2,6p "$0"; exit 0 ;;
+    *) echo "argumento desconhecido: $1" >&2; exit 2 ;;
+  esac
+done
+
+SKILL_SRC="$REPO/skills/frontstep-coder/"
+SKILL_DST="$DEST/.claude/skills/frontstep-coder/"
+WORKER_SRC="$REPO/worker/"
+WORKER_DST="$DEST/worker/"
+WORKER_FILES=(worker.mjs skill-hook.mjs hook-settings.json)
+TS="$(date +%Y%m%d-%H%M%S)"
+
+echo "repo:    $REPO"
+echo "destino: $DEST"
+[ "$DRY" = 1 ] && echo "(dry-run: nada será alterado)"
+
+# 1. node --check em tudo que é JS antes de trocar qualquer coisa.
+echo "== node --check"
+while IFS= read -r f; do
+  node --check "$f" || { echo "FALHOU node --check em $f; nada foi alterado." >&2; exit 1; }
+done < <(find "$WORKER_SRC" "$SKILL_SRC/scripts" -name '*.mjs' -o -name '*.js' | grep -v node_modules)
+echo "ok"
+
+# 2. Backup do que está no destino hoje (sem node_modules nem .bak-* antigos).
+if [ "$DRY" = 0 ]; then
+  mkdir -p "$DEST/backups"
+  BK="$DEST/backups/frontstep-$TS.tar.gz"
+  parts=()
+  [ -d "$SKILL_DST" ] && parts+=(".claude/skills/frontstep-coder")
+  for f in "${WORKER_FILES[@]}"; do [ -f "$WORKER_DST$f" ] && parts+=("worker/$f"); done
+  if [ ${#parts[@]} -gt 0 ]; then
+    tar -C "$DEST" --exclude node_modules --exclude '*.bak-*' --exclude __pycache__ -czf "$BK" "${parts[@]}"
+    echo "== backup: $BK"
+  else
+    echo "== backup: destino vazio, nada a guardar"
+  fi
+fi
+
+# 3. Copia. Na skill, apaga o que saiu do repo, mas preserva node_modules, .bak-* e __pycache__.
+#    No worker, só os arquivos do repo são tocados.
+#    Compara por conteúdo (--checksum, sem -t): data diferente depois de um git pull não conta como mudança.
+RS=(rsync -rl --checksum --itemize-changes --out-format='%i %n')
+[ "$DRY" = 1 ] && RS+=(--dry-run)
+mkdir -p "$SKILL_DST" "$WORKER_DST"
+echo "== mudanças"
+CHANGES="$(
+  "${RS[@]}" --delete --filter='P node_modules/' --filter='P *.bak-*' --filter='P __pycache__/' \
+    --exclude node_modules --exclude '*.bak-*' --exclude __pycache__ \
+    "$SKILL_SRC" "$SKILL_DST" | sed 's|^\([^ ]*\) *|\1 skills/frontstep-coder/|'
+  "${RS[@]}" "${WORKER_FILES[@]/#/$WORKER_SRC}" "$WORKER_DST" | sed 's|^\([^ ]*\) *|\1 worker/|'
+)"
+CHANGES="$(printf '%s\n' "$CHANGES" | grep -E '^(>f|\*deleting|cL)' | grep -v -E '/$' || true)"
+if [ -z "$CHANGES" ]; then echo "nenhuma"; else printf '%s\n' "$CHANGES"; fi
+
+# 4. Dono = frontstep (só dá pra mudar se estiver rodando como root; senão confere).
+if [ "$DRY" = 0 ]; then
+  if [ "$(id -u)" = 0 ]; then
+    chown -R "$OWNER:$OWNER" "$SKILL_DST"
+    for f in "${WORKER_FILES[@]}"; do chown "$OWNER:$OWNER" "$WORKER_DST$f"; done
+  elif [ "$(id -un)" != "$OWNER" ]; then
+    echo "AVISO: rodando como $(id -un), não como $OWNER; os arquivos ficaram com dono $(id -un)." >&2
+  fi
+fi
+
+# 5. O que o dono precisa fazer.
+if printf '%s\n' "$CHANGES" | grep -q ' skills/frontstep-coder/package\(-lock\)\?\.json$'; then
+  echo "package.json da skill mudou: rode  cd $SKILL_DST && npm ci"
+fi
+if printf '%s\n' "$CHANGES" | grep -q ' worker/'; then
+  echo "o worker mudou; para valer, rode:  sudo systemctl restart frontstep-worker"
+else
+  echo "o worker não mudou; não precisa reiniciar."
+fi

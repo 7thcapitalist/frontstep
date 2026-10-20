@@ -1,0 +1,54 @@
+{
+  "site": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\recanto-das-pedras\\public",
+  "scenario": "frontstep/local-briefs/recanto-das-pedras.scenario.json",
+  "startedAt": "2026-10-16T21:59:12.093Z",
+  "viewport": {
+    "width": 1365,
+    "height": 900
+  },
+  "notes": [],
+  "motion": {
+    "totalEvents": 2,
+    "counts": {
+      "animationstart": 1,
+      "transitionrun": 1,
+      "Element.animate": 0
+    },
+    "phases": {
+      "load": 1,
+      "scenario-2-fill": 1
+    },
+    "samples": [
+      {
+        "kind": "animationstart",
+        "target": "img",
+        "detail": "landscape-breathe",
+        "phase": "load",
+        "ms": 240
+      },
+      {
+        "kind": "transitionrun",
+        "target": "aside.consult-result",
+        "detail": "width",
+        "phase": "scenario-2-fill",
+        "ms": 4340
+      }
+    ],
+    "activeAnimations": [
+      {
+        "name": "landscape-breathe",
+        "playState": "running"
+      }
+    ]
+  },
+  "pageErrors": [],
+  "reducedMotion": {
+    "matches": true,
+    "textLength": 2583,
+    "meaningfulElements": 15,
+    "hiddenMeaningful": [],
+    "screenshot": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\recanto-das-pedras\\motion\\reduced-motion.png"
+  },
+  "completed": true,
+  "finishedAt": "2026-10-16T21:59:20.895Z"
+}

@@ -1,0 +1,155 @@
+# Frontstep
+
+Fábrica de sites para pequeno negócio brasileiro. Este repositório é a fonte da verdade do
+builder. O mini PC é só onde ele roda.
+
+Escreva e fale em português com o João.
+
+## O que acontece, da ponta à ponta
+
+1. **Captura** (n8n workflow 0): formulário com nicho e cidade, Apify varre o Google Maps,
+   filtra quem não tem site, tem celular, nota e avaliações suficientes. Grava na aba `leads`
+   com status `novo`.
+2. **Prospecção** (workflow 1): dias úteis 10h BRT, até 10 leads, primeira mensagem por
+   WhatsApp. Marca `contatado`.
+3. **Resposta** (workflow 2): webhook do WAHA, classifica sim / não / opt-out / dúvida.
+4. **Brief** (workflow 3): monta o brief, escolhe o efeito e a feature premium pelo nicho,
+   manda para o mini PC.
+5. **Build** (worker + skill `frontstep-coder`): Claude Code headless constrói o site, o
+   portão de QA reprova se estiver ruim, o worker faz deploy na Vercel.
+6. **Prévia** (workflow 5): manda o link pelo WhatsApp, respeitando a janela 08-20 BRT.
+7. **Venda** (workflow 6), **pagamento** (7), **formulário pós-venda** (8), site final.
+
+## Regras que não se quebram
+
+- **Nunca leia, imprima ou copie `/etc/frontstep-worker.env`.** Tem tokens. Testar se existe
+  é permitido, ver o valor não.
+- **Nunca encoste no openclaw.** É outro projeto do João na mesma máquina.
+- **Backup antes de editar qualquer coisa em produção**, com sufixo `.bak-$(date +%Y%m%d-%H%M%S)`.
+- **`node --check` em todo JS antes de trocar o worker.** Falhou, restaura e para.
+- **A fábrica não pode sair do ar.** Qualquer coisa nova falha em silêncio, nunca derruba um
+  build. O portão de QA, por exemplo, sai com código 2 quando não consegue rodar, e o worker
+  segue sem reprovar nada.
+- **Nunca construa nada que fique consultando o n8n em loop.** O plano é Starter, 2.500
+  execuções por mês, e um polling de 30 segundos já queimou 1.000 execuções em 8 horas uma vez.
+  Tudo é push.
+- **O agente de build roda com allowlist de ferramentas, nunca com bypass de permissão.**
+
+## Estrutura
+
+```
+skills/frontstep-coder/
+  SKILL.md              o processo de 8 passos e as regras de construção
+  references/           o conhecimento, consolidado por tema
+    motion.md           curva, duração, o que animar e o que não
+    motion-review.md    checagem de animação, em lista
+    motion-opportunities.md  onde movimento se justifica
+    direction.md        direção criativa, paleta, tipografia, anti-template
+    nichos.md           família do negócio: seções, feature, imagens, regra legal, tom
+    ui-patterns.md      padrões de interface
+    accessibility.md    checagem de acessibilidade e UX
+    generated-images.md quando gerar imagem e quando não
+    fx-library.md       os efeitos de assinatura e quando usar
+    scripts/            scripts de verdade, copiados das skills de origem
+  scripts/qa-gate.mjs   o portão
+worker/worker.mjs       o worker que recebe job do n8n e constrói
+install.sh              repo -> produção, com backup e node --check
+```
+
+Atualizar o mini PC: `cd ~/frontstep && git pull && bash install.sh`. Se ele avisar que o
+worker mudou, `sudo systemctl restart frontstep-worker` (precisa do usuário `joao-vitor`,
+o `frontstep` não tem sudo).
+
+## Referências, não skills
+
+Em 6 builds nenhuma skill companheira foi comprovadamente invocada. Os motivos eram reais:
+`review-animations` tem `disable-model-invocation: true` no frontmatter, então o modelo é
+proibido de chamar; `web-design-guidelines` nunca teve conteúdo, só 1231 bytes mandando
+buscar por WebFetch, que o worker nega; e um agente headless com prompt longo não sai
+procurando skill opcional.
+
+Por isso o conteúdo de 14 skills virou 7 arquivos em `references/`, e cada passo numerado do
+SKILL.md diz qual arquivo ler. **Nada no SKILL.md pode mandar invocar skill.** Se você
+adicionar um arquivo de referência, algum passo tem que mandar lê-lo, senão ele é arquivo
+morto.
+
+## O portão de QA
+
+`node ~/.claude/skills/frontstep-coder/scripts/qa-gate.mjs sites/<slug>/public --brief brief.json`
+
+Roda no passo 6 pelo agente, e de novo pelo worker antes do deploy. Se reprovar, o worker
+chama o Claude outra vez com a lista de falhas colada e roda o portão de novo. Se ainda
+reprovar, o build morre e não deploya.
+
+Checa com Playwright, em 390px e 1280px: cor fora de token, botão no verde do WhatsApp fora
+do flutuante, h1 pequeno ou hierarquia fraca, fundo sem textura nem gradiente, seções
+repetindo o mesmo desenho, contraste abaixo de 4.5:1, ausência de motor de scroll, falta de
+`prefers-reduced-motion`, ausência de movimento medida rolando a página de verdade,
+sublinhado vazando em card clicável, imagem sem dimensão, acima de 60vh ou esticada, overflow
+horizontal, erro de JS, arquivo 404, negócio de uma pessoa sem retrato (um `data-slot="retrato"`
+com `aspect-ratio` conta), espaço reservado (`data-slot`) sobrando em brief com `fase: "final"`,
+brief sem foto nenhuma e página sem nenhum `data-slot` válido na prévia, "Frontstep" em texto
+visível ou link de WhatsApp para o número da Frontstep em brief com `fase: "final"`, e feature premium
+declarada no brief que não apareceu na página. Mais de dois espaços
+reservados na prévia é WARN.
+
+Todo FAIL é obrigatório. WARN é conselho.
+
+## A feature premium
+
+O que justifica o preço não é o acabamento, é ter algo que o cliente não conseguiria fazer
+sozinho num template. O brief carrega `premium_feature`, escolhida pelo nicho no workflow 3.
+O bloco sai marcado com `data-feature="<id>"` e o portão reprova se faltar.
+
+Comida ganha `pedido`, salão e clínica ganham `agendamento`, advogado ganha `triagem`,
+academia ganha `avaliacao`, loja ganha `catalogo`, hotel ganha `disponibilidade`, indústria ganha
+`triagem` como pedido de orçamento, e o resto dos serviços locais ganha `agendamento`. O mapa
+completo de nicho para família está em `references/nichos.md`.
+
+Tudo funciona sem backend, terminando numa mensagem de WhatsApp já preenchida. Para cliente
+médico, nada de dado de saúde em formulário: é CFM e LGPD, não preferência.
+
+## WhatsApp: por que o cuidado
+
+O Kapso, que é API oficial da Meta, não aceita o número do João. Enquanto isso não resolver,
+**a prospecção fria sai pelo WAHA**, que é cliente não oficial. O risco deixa de ser custo por
+mensagem e passa a ser perder o número.
+
+Por isso o workflow 1 tem nove travas: sessão precisa estar `WORKING`, janela 08-20 BRT
+checada antes do laço, filtro de qualidade por cidade e nicho e fotos, teto de 10 por rodada,
+confere se o número existe no WhatsApp antes de mandar, cinco textos sorteados, **nenhum link
+na primeira mensagem**, pausa de 4 a 12 minutos, e o lote aborta no primeiro erro.
+
+Duas coisas aprendidas na prática:
+
+- `check-exists` devolve o `chatId` no formato `@lid`. O `sendText` é chamado sempre com
+  `<telefone>@c.us`, que é o formato comprovado em produção. Não troque isso sem testar.
+- Sessão em `FAILED` não se resolve reiniciando o container. Tem que parar e iniciar a sessão
+  pelo painel do WAHA, e às vezes escanear o QR de novo.
+
+Isso reduz o risco, não elimina. Dez por dia é risco baixo, não zero.
+
+## Armadilhas que já custaram caro
+
+- **Wait em ramo paralelo a um Respond.** Na ordem v1 o n8n executou o ramo do Wait antes do
+  nó de resposta, a resposta do webhook ficou presa por horas e o mini PC reenviou o callback
+  a cada 2 minutos. A ordem v1 segue a posição no canvas: suba os nós de resposta.
+- **IF comparando `$json.id` como objeto.** Quando o envio falha a saída não tem `id` e o IF
+  quebra, matando a corrente de retry justo quando ela era necessária. Use booleano.
+- **Editar o arquivo errado.** O `PROMPT` do worker mora em `worker.mjs`, não no `SKILL.md`.
+  Uma correção feita só no SKILL.md fez o agente pular a auditoria de acessibilidade em todo
+  build por dias.
+- **Rodar o instalador com uma sessão do Claude aberta editando os mesmos arquivos.** Já
+  quase deu conflito. Uma coisa de cada vez.
+- **Julgar um site por WebFetch.** Ele devolve cache e markdown sem atributos. Três builds
+  foram declarados errados por isso, e estavam certos. Para julgar aparência, navegador de
+  verdade. Para verificar atributo, leia o arquivo no disco.
+- **Confundir as camadas do terminal.** `PS C:\...` é Windows e não roda comando de Linux.
+  `frontstep@` não tem sudo. `joao-vitor@` é onde sudo funciona.
+
+## Números que valem lembrar
+
+- Um build custa por volta de US$ 4 e leva de 20 a 45 minutos.
+- Captura de 60 lugares no Apify custa cerca de R$ 1,30 e rende 20 e poucos leads.
+- Plano do n8n: 2.500 execuções por mês. Wait node não gasta execução extra, é a mesma
+  execução parada.
