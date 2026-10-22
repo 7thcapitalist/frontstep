@@ -1,0 +1,82 @@
+import { cp, copyFile, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import path from 'node:path';
+
+export const motionSkills = ['gsap-core', 'gsap-timeline', 'gsap-scrolltrigger', 'gsap-performance', 'gsap-plugins', 'emil-design-eng', 'improve-animations', 'threejs-shaders', 'threejs-textures', 'threejs-interaction', 'threejs-postprocessing'];
+export const suppliedSkills = ['frontend-design', 'react-best-practices', 'web-design-guidelines', 'taste-skill', 'soft-skill', 'redesign-skill', 'minimalist-skill', 'ui-ux-pro-max', 'composition-patterns', 'gpt-tasteskill'];
+export const weights = { artDirection: .20, typography: .15, composition: .15, imagery: .10, motion: .15, interaction: .15, responsive: .10 };
+
+// Copy complete skill folders: relative references (AUDIT.md etc.) must resolve.
+export async function installMotionResources(kit, site) {
+  const ref = path.join(site, 'reference');
+  const manifest = [];
+  for (const name of [...suppliedSkills, ...motionSkills]) {
+    const source = path.join(kit, 'skills', name);
+    const group = motionSkills.includes(name) ? 'motion-skills' : 'skills';
+    const target = path.join(ref, group, name);
+    await cp(source, target, { recursive: true });
+    const bytes = await readFile(path.join(target, 'SKILL.md'));
+    manifest.push({ id: name, path: `reference/${group}/${name}/SKILL.md`, sha256: createHash('sha256').update(bytes).digest('hex') });
+  }
+  await copyFile(path.join(kit, 'ACCEPTANCE-EVIDENCE.md'), path.join(ref, 'ACCEPTANCE-EVIDENCE.md'));
+  await copyFile(path.join(kit, 'VISUAL-RUBRIC.md'), path.join(ref, 'VISUAL-RUBRIC.md'));
+  await copyFile(path.join(kit, 'VERCEL-BENCHMARKS.md'), path.join(ref, 'VERCEL-BENCHMARKS.md'));
+  await copyFile(path.join(kit, 'CREATIVE-DEVELOPMENT.md'), path.join(ref, 'CREATIVE-DEVELOPMENT.md'));
+  await copyFile(path.join(kit, 'SPATIAL-STORYTELLING.md'), path.join(ref, 'SPATIAL-STORYTELLING.md'));
+  await cp(path.join(kit, 'spatial-source'), path.join(ref, 'spatial-source'), {recursive:true});
+  await copyFile(path.join(kit, 'skills', 'THREEJS-SOURCE.json'), path.join(ref, 'motion-skills', 'THREEJS-SOURCE.json'));
+  await copyFile(path.join(kit, 'skills', 'THREEJS-UPSTREAM-README.md'), path.join(ref, 'motion-skills', 'THREEJS-UPSTREAM-README.md'));
+  await cp(path.join(kit, 'benchmarks'), path.join(ref, 'benchmarks'), { recursive: true });
+  await cp(path.join(kit, 'runtime', 'public'), path.join(site, 'public', 'vendor'), { recursive: true });
+  await copyFile(path.join(kit, 'runtime', 'MOTION-RUNTIME.md'), path.join(ref, 'MOTION-RUNTIME.md'));
+  await writeFile(path.join(ref, 'skill-manifest.json'), JSON.stringify(manifest, null, 2));
+  return manifest;
+}
+
+export function motionGuidance(phase) {
+  const common = ` Read reference/ACCEPTANCE-EVIDENCE.md for reproducible acceptance, artifact integrity and the distinction between factory and commercial readiness. Read reference/SPATIAL-STORYTELLING.md and reference/CREATIVE-DEVELOPMENT.md first, then reference/VERCEL-BENCHMARKS.md and reference/VISUAL-RUBRIC.md. The user rejected the previous local flagship and its internal score; historical screenshots are not an approved quality ceiling. Open reference/benchmarks/frontstep-hero.png and frontstep-product.png with the image tool during design/build; study composition, not the business facts. Inspect reference/benchmarks/frontstep-kinetic-flow.png, frontstep-kinetic-assembled.png and frontstep-kinetic-expanded.png as three states of the current manual experiment. The older frontstep-v2 and frontstep-cinematic captures document rejected iterations, not the current design. Adapt that craft to the brief; these manually composed references are not automatic generation results. Complete copies of the ten supplied skills and their linked references are in reference/skills/; use those folders when a flattened reference links to another file. Do not execute downloaded repository scripts; the orchestrator already ran the local search/direction tools. The user's benchmark is the actual Frontstep portfolio: original composition plus an observable, business-specific scene, not a page of fade-in cards. Read reference/MOTION-RUNTIME.md: vetted local animation code is already available in public/vendor/. Use its real API, or implement an equally purposeful custom CSS/WAAPI scene. Never import an unavailable package. Mark the signature scene with data-motion-signature and an informative data-motion-purpose; mark its moving parts with data-motion-part. These attributes identify observable browser evidence, not a substitute for implementation. Meaningful content must be visible without JS. The optional standalone public/vendor/frontstep-spatial.js is an actual local WebGL implementation with configurable three-state geometry; its API is in SPATIAL-STORYTELLING.md. Use it only when a spatial scene belongs to the brief, adapting the states rather than cloning the Frontstep knot. For a deliberate WebGL scene, read the copied threejs-shaders, threejs-textures and threejs-interaction skills under reference/motion-skills. They are API/technique references, not visual art direction; follow the brief and storyboard. Use postprocessing only for a specific visual need and budget. Keep input responses immediate, reduced motion complete, and scrolling native.`;
+  if (phase === 'design') return common + ` Read reference/motion-skills/emil-design-eng/SKILL.md. Set renderingMode to dom or webgl explicitly. Add motionRecipe as a STRING of at least 20 characters naming the concrete runtime recipe/API or custom scene; put optional object details in motionRecipeDetails, never in motionRecipe. Add motionStoryboard (array of at least 3 objects: trigger, visualState, purpose), and skillApplications (at least 3 objects: skill, principle, decision). Explain why the motion belongs to this niche. For an ambitious 3D brief add spatialPlan with businessMetaphor, firstViewport, three geometric/camera states, assets, mobile, fallback, budget and continuation through the whole page. Make the hero an actual designed scene in the first viewport, not a large headline followed by an empty rectangle. The reference screenshot is a craft baseline, not an upper bound. Do not copy unsupported benchmark claims.`;
+  if (phase === 'review') return common + ` Read reference/motion-skills/improve-animations/SKILL.md and AUDIT.md in that folder, plus reference/motion-skills/gsap-performance/SKILL.md. This is the read-only audit phase; output the requested JSON rather than stopping for approval. Review skill-usage.json against the actual source. For WebGL, verify actual canvas pixels at initial, middle and final states, reverse scroll and mobile framing; computed CSS alone cannot prove geometric animation. Inspect every section and the contact path. Ignore the builder's opinion of its quality. Use the temporal storyboard and measured property changes to evaluate motion; report limitations instead of pretending a still proves smoothness.`;
+  return common + ` Read reference/motion-skills/emil-design-eng/SKILL.md and reference/motion-skills/gsap-performance/SKILL.md. If using GSAP, read gsap-core/SKILL.md plus gsap-timeline/SKILL.md and gsap-scrolltrigger/SKILL.md under reference/motion-skills/ as appropriate. The audit-only improve-animations skill is for the separate reviewer, not your implementation phase. Write skill-usage.json: an array of objects {skill, principle, application, files}, covering at least frontend-design, emil-design-eng and the actual motion technique; files must name existing public/ source files. Describe specific implemented decisions and where to inspect them, not 'used best practices'. Preserve these receipts during repairs. You start from the supplied local family scaffold in public/ when available: adapt the actual composition and make it more distinctive. Replace ALL sample facts/media with this brief. Do not preserve a bland section merely because the scaffold has it.`;
+}
+
+export async function verifySkillUsage(site) {
+  const usage = JSON.parse(await readFile(path.join(site, 'skill-usage.json'), 'utf8'));
+  if (!Array.isArray(usage) || usage.length < 3) throw new Error('skill-usage.json needs at least three concrete applications');
+  for (const row of usage) {
+    if (!row.skill || String(row.principle || '').length < 12 || String(row.application || '').length < 20 || !Array.isArray(row.files) || !row.files.length) throw new Error('Incomplete skill application evidence');
+    for (const file of row.files) {
+      if (!/^public\/[\w./-]+\.(html|css|js)$/.test(file) || file.includes('..')) throw new Error('Skill application must reference local public source');
+      await readFile(path.join(site, file));
+    }
+  }
+  return usage;
+}
+
+export function assessReview(review) {
+  const entries = Object.entries(weights);
+  if (!review.criteria || entries.some(([key]) => !Number.isFinite(review.criteria[key]) || review.criteria[key] < 0 || review.criteria[key] > 10)) throw new Error('Visual reviewer omitted calibrated criteria');
+  // Compare the weighted value before presentation rounding (9.05 must remain eligible).
+  const computed = entries.reduce((sum, [key, weight]) => sum + review.criteria[key] * (weight * 100), 0) / 100;
+  return { ...review, reviewerScore: review.score, score: computed, displayScore: computed.toFixed(2), passed: review.passed === true && computed > 9 && entries.every(([key]) => review.criteria[key] >= 8.5) };
+}
+
+// A 3D plan must describe actual poses and camera decisions before implementation.
+export function verifySpatialPlan(plan) {
+  const recipe = String(plan.motionRecipe || '');
+  // A reference such as "sem carregar Three.js" declares a DOM implementation.
+  // Remove only directly negated technology names, not unrelated positive uses.
+  const positiveRecipe = recipe.replace(/\b(?:without|no|sem|n[aã]o|do not|not using|avoid)\s+(?:(?:use|load|usar|carregar|using|loading|importing)\s+)?(?:webgl|three\.?js|kinetic-sculpture|frontstep-spatial)\b/gi, '');
+  const mentionsSpatial = /webgl|three\.?js|kinetic-sculpture|frontstep-spatial/i.test(positiveRecipe);
+  if (plan.renderingMode !== undefined && !['dom', 'webgl'].includes(plan.renderingMode)) throw new Error('renderingMode must be dom or webgl');
+  if (plan.renderingMode === 'dom' && (plan.spatialPlan || mentionsSpatial)) throw new Error('DOM plan conflicts with a positive spatial implementation');
+  const required = !!plan.spatialPlan || plan.renderingMode === 'webgl' || mentionsSpatial;
+  if(!required)return null;
+  const spatial=plan.spatialPlan;
+  const fields=['businessMetaphor','firstViewport','assets','mobile','fallback','budget','continuation'];
+  if(!spatial||fields.some(key=>typeof spatial[key]!=='string'||spatial[key].trim().length<12))throw new Error('Spatial plan needs business, composition, assets, mobile, fallback, budget and whole-page continuation');
+  if(!Array.isArray(spatial.states)||spatial.states.length<3||spatial.states.some(state=>['trigger','geometry','camera','purpose'].some(key=>typeof state[key]!=='string'||state[key].trim().length<8)))throw new Error('Spatial plan needs three concrete trigger/geometry/camera/purpose states');
+  if(new Set(spatial.states.map(state=>state.geometry.trim().toLowerCase())).size<3)throw new Error('Spatial states must describe three different geometric compositions');
+  return spatial;
+}
+

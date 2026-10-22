@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f1f0e9">
+  <title>Frontstep — O primeiro passo do seu cliente.</title>
+  <meta name="description" content="Sites com identidade para negócios de verdade. Conheça as possibilidades e peça uma prévia do site do seu negócio à Frontstep.">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="./fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./fonts/fonts.css"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cinematic.css"><link rel="stylesheet" href="./kinetic.css">
+  <script type="module" src="./assets/app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<header class="header wrap">
+  <a class="brand" href="#inicio" aria-label="Frontstep, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M2 38V26h12V14h12V2h12v36Z"/></svg>frontstep</a>
+  <nav aria-label="Principal"><a href="#sites">Os sites</a><a href="#processo">O processo</a><a href="#detalhes">O que vem</a></nav>
+  <a class="button button-small header-cta" href="#previa">Quero minha prévia <span aria-hidden="true">↗</span></a>
+</header>
+<main id="conteudo">
+  <section class="hero hero-kinetic" id="inicio" aria-labelledby="hero-title" data-motion-signature="kinetic-sculpture" data-motion-purpose="Uma escultura modular se transforma em caminho ascendente e se abre pela rolagem">
+    <div class="kinetic-stage">
+      <div class="hero-art">
+        <div class="kinetic-fallback" aria-hidden="true"><div class="fallback-step"></div><div class="fallback-step"></div><div class="fallback-step"></div><div class="fallback-step"></div><div class="fallback-step"></div><div class="fallback-step"></div></div>
+        <canvas id="hero-canvas" data-spatial-canvas aria-hidden="true"></canvas>
+      </div>
+      <div class="kinetic-copy wrap">
+        <p class="kinetic-intro">Design que move o seu negócio.</p>
+        <h1 id="hero-title">Seu próximo<br>salto.</h1>
+        <div class="kinetic-second" aria-hidden="true"><h2>Cada negócio.<br>Um universo.</h2><p>Uma presença com o seu jeito.<br>Feita para ser lembrada.</p></div>
+      </div>
+      <div class="kinetic-footer wrap">
+        <div class="kinetic-invitation"><p>Sites que despertam curiosidade.<br>E transformam interesse em conversa.</p><a class="button" href="#previa">Começar meu projeto <span aria-hidden="true">↗</span></a></div>
+        <div class="sculpture-controls" role="group" aria-label="Transformações da escultura"><button type="button" data-sculpture-state="0" aria-pressed="true">Fluxo</button><button type="button" data-sculpture-state="1" aria-pressed="false">Construção</button><button type="button" data-sculpture-state="2" aria-pressed="false">Expansão</button></div>
+        <a class="kinetic-scroll" href="#experiencias"><span>Role para transformar</span><svg viewBox="0 0 24 40" aria-hidden="true"><path d="M12 1v35M4 28l8 8 8-8"/></svg></a>
+      </div>
+      <div class="kinetic-progress" aria-hidden="true"><span></span></div>
+    </div>
+  </section>
+  <section class="journey" id="experiencias" aria-labelledby="journey-title" data-motion-signature="photo-worlds" data-motion-purpose="A rolagem atravessa três sensações com fotografias e enquadramentos próprios">
+    <h2 id="journey-title" class="visually-hidden">Uma presença. Muitas sensações.</h2>
+    <div class="journey-stage"><canvas id="journey-canvas" aria-hidden="true"></canvas>
+      <div class="journey-chapters">
+        <article class="journey-chapter chapter-food" id="journey-food"><img class="journey-photo" src="./media/food.jpg" alt="Pratos brasileiros em uma mesa, fotografia ilustrativa" loading="lazy"><div class="chapter-top"><span>mesa da praça</span><span>Restaurante / conceito</span></div><h3>Dá<br><em>vontade.</em></h3><div class="chapter-bottom"><p>Antes da primeira garfada,<br>o primeiro olhar.</p><a href="#previa" data-brief-scene="food">Quero essa sensação <span>↗</span></a></div><span class="chapter-word" aria-hidden="true">SABOR</span></article>
+        <article class="journey-chapter chapter-travel" id="journey-travel"><img class="journey-photo" src="./media/hospitality.jpg" alt="Montanhas e campo, fotografia ilustrativa de Álvaro Julião" loading="lazy"><div class="chapter-top"><span>recanto</span><span>Hospedagem / conceito</span></div><h3>Já dá<br>para <em>sentir.</em></h3><div class="chapter-bottom"><p>Um convite para estar lá.<br>Mesmo antes de chegar.</p><a href="#previa" data-brief-scene="hospitality">Quero essa sensação <span>↗</span></a></div><span class="chapter-word" aria-hidden="true">RESPIRO</span></article>
+        <article class="journey-chapter chapter-beauty" id="journey-beauty"><img class="journey-photo" src="./media/beauty.jpg" alt="Tesouras profissionais de salão, fotografia ilustrativa de James Collington" loading="lazy"><div class="chapter-top"><span>ateliê aurora</span><span>Beleza / conceito</span></div><h3>Um olhar.<br><em>Outro jeito.</em></h3><div class="chapter-bottom"><p>O cuidado começa<br>em cada detalhe.</p><a href="#previa" data-brief-scene="beauty">Quero essa sensação <span>↗</span></a></div><span class="chapter-word" aria-hidden="true">CUIDADO</span></article>
+      </div>
+      <nav class="journey-nav" aria-label="Capítulos da experiência"><a href="#journey-food" data-journey-index="0" aria-current="true"><span>01</span> Sabor<i></i></a><a href="#journey-travel" data-journey-index="1"><span>02</span> Respiro<i></i></a><a href="#journey-beauty" data-journey-index="2"><span>03</span> Cuidado<i></i></a></nav>
+      <span class="journey-caption">Fotografias reais. Universos demonstrativos.</span>
+    </div>
+  </section>
+
+  <section class="work" id="sites" aria-labelledby="work-title">
+    <div class="work-heading wrap"><div class="section-kicker"><span class="tiny-step" aria-hidden="true"></span> O seu negócio tem um jeito próprio.</div><div class="heading-row"><h2 id="work-title">O seu jeito.<br>Em cada detalhe.</h2><p>Identidades diferentes. Experiências completas.<br>Escolha um conceito e explore o que ele pode ser.</p></div></div>
+    <div class="studio wrap">
+      <div class="studio-tabs" role="tablist" aria-label="Explore os conceitos por negócio">
+        <button id="tab-food" role="tab" aria-selected="true" aria-controls="scene-panel" data-scene="food">À mesa</button>
+        <button id="tab-hospitality" role="tab" aria-selected="false" aria-controls="scene-panel" tabindex="-1" data-scene="hospitality">Lá fora</button>
+        <button id="tab-beauty" role="tab" aria-selected="false" aria-controls="scene-panel" tabindex="-1" data-scene="beauty">Seu momento</button>
+        <button id="tab-fitness" role="tab" aria-selected="false" aria-controls="scene-panel" tabindex="-1" data-scene="fitness">Em movimento</button>
+        <button id="tab-shop" role="tab" aria-selected="false" aria-controls="scene-panel" tabindex="-1" data-scene="shop">Boas ideias</button>
+        <button id="tab-industry" role="tab" aria-selected="false" aria-controls="scene-panel" tabindex="-1" data-scene="industry">Precisão</button>
+      </div>
+      <noscript><nav class="static-concepts" aria-label="Conceitos completos"><a href="./demos/mesa-da-praca/">Restaurante</a><a href="./demos/recanto-das-pedras/">Hospedagem</a><a href="./demos/atelie-aurora/">Beleza</a><a href="./demos/movimento-bairro/">Fitness</a><a href="./demos/casa-do-papel/">Loja</a><a href="./demos/metal-linha/">Indústria</a></nav></noscript>
+      <div class="scene-panel scene-food" id="scene-panel" role="tabpanel" aria-labelledby="tab-food" tabindex="0">
+        <div class="scene-top"><span class="scene-brand" id="scene-brand">mesa da praça<span class="scene-emblem" aria-hidden="true">✳</span></span><span class="scene-category" id="scene-category">Cozinha que acolhe.</span><a class="scene-open" id="scene-open" href="./demos/mesa-da-praca/" target="_blank" rel="noopener" aria-label="Abrir conceito completo Mesa da Praça em nova aba">Abrir site <span aria-hidden="true">↗</span></a></div>
+        <div class="scene-body"><div class="scene-copy"><span class="scene-eyebrow" id="scene-eyebrow">Sente. Compartilhe. Fique mais.</span><h3 id="scene-title">O melhor <br>da vida é <br><em>à mesa.</em></h3><p id="scene-description">Comida de verdade, conversa sem pressa e espaço para mais um.</p><a class="scene-cta" id="scene-cta" href="./demos/mesa-da-praca/" target="_blank" rel="noopener">Conhecer o cardápio <span aria-hidden="true">↗</span></a><div class="paper-controls" hidden><span>Uma ideia. A sua cor.</span><div class="paper-options" role="group" aria-label="Cor da capa do caderno"><button type="button" data-paper-color="#3155ff" aria-label="Capa azul" aria-pressed="true" style="--swatch:#3155ff"></button><button type="button" data-paper-color="#d56740" aria-label="Capa laranja" aria-pressed="false" style="--swatch:#d56740"></button><button type="button" data-paper-color="#386858" aria-label="Capa verde" aria-pressed="false" style="--swatch:#386858"></button><button type="button" id="paper-open" class="paper-toggle" aria-pressed="false">Abrir caderno <span aria-hidden="true">+</span></button></div><label class="paper-note-label" for="paper-note">Qual seria a sua primeira ideia?</label><input id="paper-note" maxlength="70" placeholder="Escreva. Ela aparece no caderno." autocomplete="off"><small>Uma ideia sua, na primeira página.</small></div></div>
+          <figure class="scene-image"><img id="scene-photo" src="./media/food.jpg" alt="Mesa com pratos da culinária brasileira, fotografia de referência" width="1600" height="1067" loading="lazy"><canvas class="paper-canvas" aria-hidden="true"></canvas><figcaption id="scene-photo-label">Para dividir bons momentos.</figcaption></figure>
+        </div>
+        <div class="scene-bottom"><span id="scene-bottom-note">Feito para dar água na boca.</span><span class="scene-index" id="scene-index">01 / 06</span><span>Conceito demonstrativo</span></div>
+      </div>
+      <div class="studio-caption"><a class="concept-brief" id="concept-brief" href="#previa">Quero uma prévia nesse estilo <span aria-hidden="true">↗</span></a><button class="credit-trigger" type="button" aria-expanded="false" aria-controls="photo-credits">Fotografias reais, com créditos <span aria-hidden="true">+</span></button></div>
+      <div id="photo-credits" class="photo-credits" hidden><p>Os negócios destes conceitos são fictícios. As fotos ilustrativas são de <a href="https://www.pexels.com/photo/varied-brazilian-cuisine-on-wooden-table-28992209/" target="_blank" rel="noopener">Pedro Furtado</a>, <a href="https://www.pexels.com/photo/a-grass-field-near-the-mountain-9636197/" target="_blank" rel="noopener">Álvaro Julião</a>, <a href="https://www.pexels.com/photo/professional-hairdressing-scissors-in-salon-setup-30807432/" target="_blank" rel="noopener">James Collington</a>, <a href="https://www.pexels.com/photo/rolled-yoga-mat-on-shelf-on-the-wall-7318664/" target="_blank" rel="noopener">MART PRODUCTION</a>, <a href="https://www.pexels.com/photo/woman-hands-on-table-with-colorful-notebooks-and-pens-10607157/" target="_blank" rel="noopener">cottonbro studio</a> e <a href="https://www.pexels.com/photo/tool-in-factory-10119310/" target="_blank" rel="noopener">Harold Granados</a>, sob a <a href="https://www.pexels.com/license/" target="_blank" rel="noopener">licença Pexels</a>. Não representam clientes ou instalações reais da Frontstep.</p></div>
+      <div class="more-worlds"><span>Outras possibilidades</span><a href="./demos/vila-clara/" target="_blank" rel="noopener">Contabilidade <span>↗</span></a><a href="./demos/espaco-cuidado/" target="_blank" rel="noopener">Saúde <span>↗</span></a><a href="./demos/conserta-bairro/" target="_blank" rel="noopener">Serviços locais <span>↗</span></a></div>
+    </div>
+  </section>
+
+  <section class="process" id="processo" aria-labelledby="process-title" data-motion-signature="steps-process" data-motion-purpose="Os três passos se alinham ao avançar na página">
+    <div class="wrap"><div class="process-heading"><p>Do primeiro contato ao primeiro clique.</p><h2 id="process-title">Da primeira ideia.<br>Ao primeiro clique.</h2></div>
+      <div class="process-steps"><svg class="process-line" viewBox="0 0 1100 140" preserveAspectRatio="none" aria-hidden="true"><path d="M0 108H385V63H770V18H1100"/><circle class="process-traveler" cx="0" cy="108" r="4"/></svg>
+        <article class="process-step" data-motion-part><span class="step-number">1</span><div class="process-art preview-art" aria-hidden="true"><div class="mini-site"><div class="mini-browser"><i></i><i></i><i></i></div><div class="mini-layout"><div><span>Seu negócio.</span><strong>Um novo<br>começo.</strong><b>Conheça ↗</b></div><div class="mini-stair"></div></div></div><span class="art-sticker">Sua primeira prévia ↗</span></div><h3>Você vê primeiro.</h3><p>Conte um pouco do seu negócio. A gente transforma a conversa em uma prévia para você conhecer.</p><span class="step-note">Uma ideia que você pode abrir.</span></article>
+        <article class="process-step" data-motion-part><span class="step-number">2</span><div class="process-art adjust-art" aria-hidden="true"><span class="type-sample">Aa<span>Do seu jeito.</span></span><div class="color-sample"><i></i><i></i><i></i></div><span class="edit-cursor"><svg viewBox="0 0 30 34"><path d="M3 2v25l7-7 6 11 5-3-6-10h11Z"/></svg>Você + Frontstep</span><span class="adjust-line"></span></div><h3>A gente acerta junto.</h3><p>Veja o visual, teste no celular e diga o que precisa mudar. Alinhamos conteúdo, escopo e valor.</p><span class="step-note">Com clareza em cada escolha.</span></article>
+        <article class="process-step" data-motion-part><span class="step-number">3</span><div class="process-art live-art" aria-hidden="true"><div class="launch-step"></div><div class="domain-pill"><span>✓</span> seunegocio.com.br</div><span class="live-label"><i></i> Pronto para receber.</span><svg class="launch-orbit" viewBox="0 0 320 180"><ellipse cx="160" cy="100" rx="145" ry="58" transform="rotate(-15 160 100)"/></svg></div><h3>Seu negócio, no ar.</h3><p>Com tudo aprovado, conectamos seu domínio e deixamos os caminhos de contato prontos.</p><span class="step-note">Pronto para o próximo cliente.</span></article>
+      </div>
+      <div class="process-footer"><span>Você não precisa entender de sites.<br>É por isso que a gente está aqui.</span><a class="button button-white" href="#previa">Vamos dar o primeiro passo <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </section>
+
+  <section class="details wrap" id="detalhes" aria-labelledby="details-title"><div class="details-copy"><p class="section-kicker">Uma experiência inteira, em qualquer tela.</p><h2 id="details-title">Bonito de ver.<br>Bom de usar.</h2><p class="details-intro">Cada detalhe ajuda a pessoa a encontrar o que procura e chegar até você.</p>
+    <div class="feature-tabs" role="tablist" aria-label="Detalhes do site" aria-orientation="vertical">
+      <button id="feature-mobile" role="tab" aria-selected="true" aria-controls="phone-panel" data-feature="mobile"><svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg><span><strong>Feito para o celular.</strong><small>Leitura clara, fotos bem enquadradas, tudo ao alcance do polegar.</small></span><span aria-hidden="true">↗</span></button>
+      <button id="feature-contact" role="tab" aria-selected="false" aria-controls="phone-panel" tabindex="-1" data-feature="contact"><svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 1-8 8H4l1-5a8 8 0 1 1 15-3Z"/><path d="M8 10h8M8 14h5"/></svg><span><strong>Uma conversa mais fácil.</strong><small>WhatsApp com a mensagem certa para começar o atendimento.</small></span><span aria-hidden="true">↗</span></button>
+      <button id="feature-info" role="tab" aria-selected="false" aria-controls="phone-panel" tabindex="-1" data-feature="info"><svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9c0 6-7 13-7 13S5 15 5 9a7 7 0 1 1 14 0Z"/><circle cx="12" cy="9" r="2"/></svg><span><strong>O essencial, no lugar certo.</strong><small>Serviços, localização e horários sem deixar ninguém procurando.</small></span><span aria-hidden="true">↗</span></button>
+    </div></div>
+    <div class="phone-stage" id="phone-panel" role="tabpanel" aria-labelledby="feature-mobile" tabindex="0"><div class="phone-orbit" aria-hidden="true"></div><span class="phone-stage-label">Pequena tela. Grande primeira impressão.</span><div class="phone"><div class="phone-camera" aria-hidden="true"></div><div class="phone-screen"><div class="phone-nav">recanto <span>☰</span></div><div class="phone-visual"><img src="./media/hospitality.jpg" alt="Paisagem montanhosa usada em um conceito de hospedagem" width="1100" height="733" loading="lazy"><span>Deixe a pressa<br>lá fora.</span></div><div class="phone-content"><span class="phone-tag">Seu próximo respiro.</span><h3>Um tempo<br>só seu.</h3><p>Natureza, tranquilidade e espaço para desacelerar.</p><div class="phone-contact" data-phone="contact"><span aria-hidden="true">↗</span> Conversar sobre minha estadia</div><div class="phone-info" data-phone="info"><span>Como chegar</span><strong>Planeje seu caminho <span>↗</span></strong><div class="map-drawing" aria-hidden="true"><i></i><b>R</b></div></div></div></div></div><span class="phone-example">Recanto das Pedras · conceito de hospedagem</span><div class="phone-callout" aria-live="polite"><span class="live-dot" aria-hidden="true"></span><span id="phone-caption">Um site inteiro pensado para caber aqui.</span></div></div>
+  </section>
+
+  <section class="brief-section" id="previa" aria-labelledby="brief-title"><div class="wrap brief-grid"><div class="brief-copy"><p class="section-kicker"><span class="tiny-step" aria-hidden="true"></span> O próximo pode ser o seu.</p><h2 id="brief-title">Seu próximo<br>capítulo<br>começa aqui.</h2><p>Conte o básico. A conversa continua no WhatsApp, com uma mensagem pronta para você revisar e enviar.</p><a class="direct-contact" href="https://wa.me/5511927415278" target="_blank" rel="noopener">Prefiro conversar direto <span aria-hidden="true">↗</span></a><svg class="brief-step" viewBox="0 0 240 240" aria-hidden="true"><path d="M10 230v-70h70V90h70V20h80v210Z"/></svg></div>
+    <form id="brief-form" class="brief-form"><div id="brief-inspiration" class="brief-inspiration" hidden><span></span><button type="button" id="clear-inspiration" aria-label="Remover conceito de referência">×</button></div><fieldset><legend>Que tipo de negócio é o seu?</legend><div class="niche-options"><label><input type="radio" name="niche" value="Restaurante" checked><span>Restaurante</span></label><label><input type="radio" name="niche" value="Hospedagem"><span>Hospedagem</span></label><label><input type="radio" name="niche" value="Beleza"><span>Beleza</span></label><label><input type="radio" name="niche" value="Fitness"><span>Fitness</span></label><label><input type="radio" name="niche" value="Loja"><span>Loja</span></label><label><input type="radio" name="niche" value="Indústria"><span>Indústria</span></label><label><input type="radio" name="niche" value="Contabilidade"><span>Contabilidade</span></label><label><input type="radio" name="niche" value="Saúde"><span>Saúde</span></label><label><input type="radio" name="niche" value="Serviços"><span>Serviços</span></label><label><input type="radio" name="niche" value="Outro"><span>Outro</span></label></div></fieldset>
+      <div class="form-row"><label for="business">Nome do negócio<input id="business" name="business" placeholder="Como ele se chama?" maxlength="100" autocomplete="organization" required></label><label for="city">Cidade<input id="city" name="city" placeholder="Onde você está?" maxlength="100" autocomplete="address-level2" required></label></div>
+      <label for="wish">O que você gostaria de mostrar?<span class="optional">Opcional</span><textarea id="wish" name="wish" rows="2" maxlength="600" placeholder="Seus serviços, produtos, espaço, uma ideia…"></textarea></label>
+      <div class="message-preview"><div><span>Sua primeira mensagem</span><button type="button" id="copy-brief">Copiar</button></div><p id="brief-summary">Olá, Frontstep! Quero uma prévia para meu restaurante.</p></div>
+      <button class="button form-submit" type="submit" disabled>Continuar no WhatsApp <span aria-hidden="true">↗</span></button><p class="form-note" id="form-status" role="status">Você revisa a mensagem antes de enviar. Nada é enviado automaticamente.</p>
+      <noscript><p>Para pedir sua prévia, <a href="https://wa.me/5511927415278">converse com a Frontstep pelo WhatsApp</a>.</p></noscript>
+    </form></div></section>
+
+  <section class="faq wrap" aria-labelledby="faq-title"><h2 id="faq-title">Antes do<br>primeiro passo.</h2><div class="faq-list"><details><summary>A prévia é gratuita?<span aria-hidden="true">+</span></summary><p>Sim. Você conhece a proposta visual antes de decidir. O escopo e o valor do projeto são combinados com você antes da contratação.</p></details><details><summary>Já tenho Instagram. Preciso de um site?<span aria-hidden="true">+</span></summary><p>Os dois se complementam. O site reúne as informações do negócio em um endereço próprio e dá um caminho direto para quem procura seus serviços, horários ou contato.</p></details><details><summary>Posso usar meu próprio domínio?<span aria-hidden="true">+</span></summary><p>Sim. Se você já tem um domínio, alinhamos a conexão. Se ainda não tem, ajudamos a escolher e explicamos o registro e os custos antes de seguir.</p></details><details><summary>E se eu quiser mudar alguma coisa?<span aria-hidden="true">+</span></summary><p>A prévia serve justamente para conversar sobre as escolhas. Conte o que precisa mudar e combinamos os ajustes e o que está incluído antes de publicar.</p></details></div></section>
+</main>
+<footer class="footer"><div class="wrap"><div class="footer-top"><span>Seu negócio já tem uma história.<br>Vamos fazer o próximo movimento.</span><a href="#previa">Começar uma conversa <span aria-hidden="true">↗</span></a></div><a class="footer-wordmark" href="#inicio" aria-label="Frontstep, voltar ao início">frontstep</a><div class="footer-bottom"><span>Sites para negócios de verdade.</span><span>Frontstep © 2026</span><a href="https://wa.me/5511927415278" target="_blank" rel="noopener">WhatsApp <span aria-hidden="true">↗</span></a></div></div></footer>
+</body></html>
+
+
+
+
+

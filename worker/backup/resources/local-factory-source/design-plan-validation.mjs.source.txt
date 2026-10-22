@@ -1,0 +1,16 @@
+import {verifySpatialPlan} from './design-resources.mjs';
+export function validateDesignPlan(plan, offeredDirections) {
+  const problems=[];
+  if(!plan||typeof plan!=='object'||Array.isArray(plan))throw new Error('Design plan must be a JSON object');
+  const strings=['direction','alternative','why','typography','palette','hero','sectionRhythm','feature','visualMaterial','motionConcept','motionFallback'];
+  for(const key of strings)if(typeof plan[key]!=='string'||plan[key].trim().length<12)problems.push(`${key}: string with at least 12 characters required`);
+  if(!Array.isArray(plan.signatureDetails)||plan.signatureDetails.length<3)problems.push('signatureDetails: at least three entries required');
+  if(!offeredDirections.includes(plan.tasteDirectionId))problems.push(`tasteDirectionId: choose exactly one of ${offeredDirections.join(', ')}`);
+  if(!Array.isArray(plan.contentClaims)||plan.contentClaims.length<2||plan.contentClaims.some(x=>!x.claim||!x.evidence))problems.push('contentClaims: at least two claim/evidence objects required');
+  for(const key of ['mediaInventory','missingInputs'])if(!Array.isArray(plan[key]))problems.push(`${key}: array required`);
+  for(const key of ['motionStoryboard','skillApplications'])if(!Array.isArray(plan[key])||plan[key].length<3)problems.push(`${key}: at least three entries required`);
+  if(typeof plan.motionRecipe!=='string'||plan.motionRecipe.trim().length<20)problems.push('motionRecipe: a concrete string required; preserve a detailed object separately as motionRecipeDetails');
+  if(problems.length)throw new Error('Invalid design-plan.json: '+problems.join('; '));
+  verifySpatialPlan(plan);
+  return plan;
+}

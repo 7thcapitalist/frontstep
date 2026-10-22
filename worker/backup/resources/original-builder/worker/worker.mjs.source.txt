@@ -1,0 +1,263 @@
+// Frontstep coder worker for a home machine. n8n pushes jobs to it; it
+// runs Claude Code headless with the frontstep-coder skill, deploys to Vercel and reports back to n8n.
+// n8n pushes each job to POST /build (through Tailscale Funnel); no polling, so no wasted n8n executions.
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import http from "node:http";
+import crypto from "node:crypto";
+
+const {
+  RUNNER_SECRET, VERCEL_TOKEN, CLAUDE_CODE_OAUTH_TOKEN,
+  N8N = "https://jvcarvalho.app.n8n.cloud/webhook",
+  WORK = path.join(process.env.HOME, "work"), UPLOADS = path.join(process.env.HOME, "uploads"),
+  PORT = "8787", BUILD_TIMEOUT_MIN = "45", MAX_TURNS = "250"
+} = process.env;
+for (const [k, v] of Object.entries({ RUNNER_SECRET, VERCEL_TOKEN, CLAUDE_CODE_OAUTH_TOKEN }))
+  if (!v) { console.error(`missing env ${k}`); process.exit(1); }
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const tail = (s, n = 1500) => (s.length > n ? s.slice(-n) : s);
+const slugOk = s => /^[a-z0-9][a-z0-9-]{1,60}$/.test(s || "");
+const rm = p => { try { fs.rmSync(p, { recursive: true, force: true }); } catch {} };
+const KEEP_DAYS = +(process.env.KEEP_DAYS || 7);
+
+// O que come disco aqui é o node_modules de cada build (200 MB+), não as fotos.
+function limpar(dir, slug) {
+  rm(path.join(dir, "sites", slug, "node_modules"));   // o deploy já foi, não precisa mais
+  rm(path.join(dir, "uploads"));                        // cópia das fotos; o original fica em ~/uploads
+  const cut = Date.now() - KEEP_DAYS * 864e5;
+  try {
+    for (const d of fs.readdirSync(WORK)) {
+      const full = path.join(WORK, d);
+      if (fs.statSync(full).mtimeMs < cut) { rm(full); console.log(`limpei build antigo ${d}`); }
+    }
+  } catch {}
+}
+function discoLivre() {
+  try { const st = fs.statfsSync(WORK); return { livre_mb: Math.round(st.bavail * st.bsize / 1048576) }; }
+  catch { return null; }
+}
+
+function run(cmd, args, { cwd, env, timeoutMs, logFile } = {}) {
+  return new Promise(resolve => {
+    const p = spawn(cmd, args, { cwd, env, stdio: ["ignore", "pipe", "pipe"] });
+    let out = "", err = "";
+    const t = timeoutMs ? setTimeout(() => { p.kill("SIGTERM"); err += "\nTIMEOUT"; }, timeoutMs) : null;
+    const w = d => logFile && fs.appendFileSync(logFile, d);
+    p.stdout.on("data", d => { out += d; w(d); });
+    p.stderr.on("data", d => { err += d; w(d); });
+    p.on("close", code => { if (t) clearTimeout(t); resolve({ code, out, err }); });
+  });
+}
+
+const PROMPT = slug => `Use the frontstep-coder skill (in ~/.claude/skills/frontstep-coder) to build the site for the brief in ./brief.json.
+Work only inside ./sites/${slug}. Follow the skill process steps 1 to 7 (plan, effect, build, rules, QA with the skill's scripts/qa.mjs, the gate, accessibility audit). Step 8 is the worker's job, not yours.
+The skill has no companion skills to invoke: everything it needs is a file under its references/ folder, and each numbered step says which file to read. Read them with the Read tool.
+
+NICHE. Reading ~/.claude/skills/frontstep-coder/references/nichos.md is mandatory in step 1, before you decide the sections. Find the family for brief.business.niche there. The family's mandatory sections and its legal restrictions (OAB for lawyers, CFM for health) are law, not suggestion.
+
+PHASE. brief.fase is "previa" or "final"; if it is missing, treat it as "previa".
+In "previa", an image the composition needs but the brief does not have becomes a designed empty slot, marked with data-slot, exactly as the skill's Photos section (Slots) says.
+In "final", no data-slot may remain on the page and the site must not mention Frontstep anywhere: recompose any section whose photo never arrived with typography instead.
+
+PHOTOS. Read the skill's Photos section and, if brief.media.rules exists, follow it too: it wins over anything else.
+Download the brief's photos into public/img with \`curl -fsSL <url> -o <file>\` and optimize them. If brief.media.uploads lists files, the client sent them and they are already on disk in ./uploads; copy them into public/img as well.
+You run headless: nobody can answer a question or approve a permission. Never stop to ask. If a download fails or a command is refused, note it in plan.md and carry on with the images you do have.
+The two sources are cumulative. Never drop media.photos because uploads exist: uploads are extra candidates, not substitutes.
+Before you place any image, open it with the Read tool and look at it, and run \`file\` on it to get its real width and height. Write in plan.md one line per image: file, dimensions, what it shows, which slot.
+A logo goes in the header, footer and favicon only, small. A photo OF a printed logo, sign, business card or letterhead is still a logo, never a hero image.
+If any image is a portrait of the person who serves the client, it must appear, in the first screen or in the about section. A one-person business (doctor, lawyer, trainer) without their face has failed.
+A vertical phone photo goes in a narrow vertical slot, a horizontal photo in a wide slot. Every image slot has a fixed aspect-ratio in CSS plus object-fit: cover, and no image goes past 60vh. Never let an image leave half a section empty.
+Leave out blurry, dark or screenshot-like images rather than featuring them.
+
+REVISIONS. If brief.revisions has items, they are changes the client asked for after seeing the preview. Every one is mandatory. A revision about colors means the whole palette, not an accent: if the client names their logo's colors, open the logo with Read and take the real values out of it.
+Run npm install and npm run build yourself so public/app.bundle.js exists.
+
+In the QA step, look at every screenshot and check each image: stretched, awkwardly cut, blurry in a feature slot, a logo used as a photo, or a big empty area beside it. Fix before finishing.
+
+THE GATE. When you think the site is done, run the gate from the build folder:
+  node ~/.claude/skills/frontstep-coder/scripts/qa-gate.mjs sites/${slug}/public --brief brief.json
+It prints FAIL and WARN lines and exits 1 if the site is not good enough. Every FAIL is mandatory: fix it and run the gate again. Do not finish with any FAIL open. The worker runs the same gate after you and refuses to deploy a site that does not pass, so leaving a FAIL open only wastes the build. Treat WARN as advice.
+If the gate exits 2 it could not run at all: say so in your final line and carry on.
+Do NOT deploy and do not run vercel: the worker deploys ./sites/${slug} after you finish.
+Finish with one last line: BUILD_OK, or BUILD_FAIL: <short reason>.`;
+
+const FIX_PROMPT = (slug, falhas) => `The site in ./sites/${slug} was built but the Frontstep QA gate REFUSED it. These are the failures, verbatim:
+
+${falhas}
+
+Fix every one of them inside ./sites/${slug}. Use the frontstep-coder skill as the reference for what "right" means: the Colour and brand section, "The bar: restrained is not the same as plain", Links that wrap blocks, and the Photos rules.
+Do not redesign the site from scratch and do not undo what already works. Change what the gate points at.
+After fixing, run the gate again from the build folder:
+  node ~/.claude/skills/frontstep-coder/scripts/qa-gate.mjs sites/${slug}/public --brief brief.json
+Repeat until it exits 0. You run headless: never stop to ask.
+Do NOT deploy and do not run vercel.
+Finish with one last line: BUILD_OK, or BUILD_FAIL: <short reason>.`;
+
+// Only the tools a static-site build needs. No blanket permission bypass.
+const ALLOWED = ["Read", "Write", "Edit", "Glob", "Grep", "Skill", "TodoWrite",
+  "Bash(npm:*)", "Bash(npx:*)", "Bash(node:*)", "Bash(python3:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(mv:*)",
+  "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(du:*)", "Bash(file:*)", "Bash(curl -fsSL:*)", "Bash(curl -L:*)"];
+
+async function build(job, dir) {
+  const { slug } = job.brief;
+  const env = { ...process.env, CI: "1" };
+  delete env.VERCEL_TOKEN; delete env.RUNNER_SECRET;          // the agent never sees these
+  const r = await run("claude", ["-p", PROMPT(slug), "--permission-mode", "acceptEdits",
+    "--allowedTools", ALLOWED.join(","), "--disallowedTools", "Bash(vercel:*),Bash(sudo:*),Bash(ssh:*),WebSearch",
+    "--max-turns", MAX_TURNS, "--output-format", "text"],
+    { cwd: dir, env, timeoutMs: +BUILD_TIMEOUT_MIN * 60000, logFile: path.join(dir, "claude.log") });
+  const last = (r.out.trim().split("\n").pop() || "").trim();
+  console.log(`[${slug}] claude exit ${r.code}: ${last}`);
+  const site = path.join(dir, "sites", slug);
+  if (r.code !== 0 || !/BUILD_OK/.test(last) || !fs.existsSync(path.join(site, "public", "index.html")))
+    throw new Error(`build falhou: ${last || tail(r.err, 300)}`);
+
+  // O portão. Roda de novo aqui, sem depender da honestidade do agente.
+  let rel = await gate(dir, slug);
+  if (rel && !rel.passou) {
+    const lista = rel.fails.map(f => `- ${f.code}: ${f.msg}${f.detail ? ` (${f.detail})` : ""}`).join("\n");
+    console.log(`[${slug}] gate reprovou (${rel.fails.length}), mandando consertar:\n${lista}`);
+    const f = await run("claude", ["-p", FIX_PROMPT(slug, lista), "--permission-mode", "acceptEdits",
+      "--allowedTools", ALLOWED.join(","), "--disallowedTools", "Bash(vercel:*),Bash(sudo:*),Bash(ssh:*),WebSearch",
+      "--max-turns", "120", "--output-format", "text"],
+      { cwd: dir, env, timeoutMs: 25 * 60000, logFile: path.join(dir, "claude.log") });
+    console.log(`[${slug}] conserto exit ${f.code}`);
+    rel = await gate(dir, slug);
+  }
+  if (rel && !rel.passou)
+    throw new Error(`gate reprovou: ${rel.fails.map(x => x.code).join(", ")}`);
+  if (!rel) console.log(`[${slug}] gate nao rodou, seguindo sem ele`);
+
+  const project = `fs-${slug}`.slice(0, 52);
+  const vt = ["--token", VERCEL_TOKEN];
+  const venv = { ...process.env };
+  const log = path.join(dir, "vercel.log");
+  await run("vercel", ["link", "--yes", "--project", project, ...vt], { cwd: site, env: venv, timeoutMs: 120000, logFile: log });
+  const d = await run("vercel", ["deploy", "--prod", "--yes", ...vt], { cwd: site, env: venv, timeoutMs: 15 * 60000, logFile: log });
+  if (d.code !== 0) throw new Error(`deploy falhou: ${tail(d.err, 300)}`);
+  // The deployment URL (…-hash-team.vercel.app) sits behind Vercel Authentication; leads need the
+  // public production alias. Take the shortest *.vercel.app alias that `vercel inspect` reports.
+  const deployUrl = (d.out.trim().split("\n").pop() || "").trim();
+  const ins = await run("vercel", ["inspect", deployUrl, ...vt], { cwd: site, env: venv, timeoutMs: 60000, logFile: log });
+  const aliases = [...new Set((ins.out + ins.err).match(/https:\/\/[a-z0-9.-]+\.vercel\.app/g) || [])]
+    .filter(u => u !== deployUrl).sort((a, b) => a.length - b.length);
+  return { url: aliases[0] || `https://${project}.vercel.app`, project };
+}
+
+// Roda o portao de QA. Devolve null quando nao foi possivel rodar (nao reprova por isso).
+async function gate(dir, slug) {
+  const script = path.join(process.env.HOME, ".claude", "skills", "frontstep-coder", "scripts", "qa-gate.mjs");
+  if (!fs.existsSync(script)) return null;
+  const g = await run("node", [script, path.join("sites", slug, "public"), "--brief", "brief.json", "--json"],
+    { cwd: dir, timeoutMs: 8 * 60000, logFile: path.join(dir, "gate.log") });
+  if (g.code === 2) return null;                       // playwright ausente, por exemplo
+  try {
+    const rel = JSON.parse(g.out.slice(g.out.indexOf("{"), g.out.lastIndexOf("}") + 1));
+    fs.writeFileSync(path.join(dir, "gate.json"), JSON.stringify(rel, null, 2));
+    return rel;
+  } catch {
+    console.log(`[${slug}] nao consegui ler a saida do gate: ${tail(g.err || g.out, 200)}`);
+    return null;
+  }
+}
+
+async function report(job, body) {
+  for (let i = 0; i < 5; i++) {
+    try {
+      const res = await fetch(`${N8N}/frontstep/build-done`, { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ row_id: job.row_id, build_token: job.build_token, slug: job.brief.slug, ...body }) });
+      if (res.ok) return;
+      console.log(`report ${res.status}`);
+    } catch (e) { console.log(`report error ${e.message}`); }
+    await sleep(5000 * (i + 1));
+  }
+}
+
+async function nextJob() {
+  const res = await fetch(`${N8N}/frontstep/next-job`, { method: "POST", headers: { authorization: `Bearer ${RUNNER_SECRET}` } });
+  if (res.status === 204) return null;
+  if (!res.ok) throw new Error(`next-job ${res.status}`);
+  const j = await res.json();
+  if (!j.job) return null;
+  const brief = typeof j.job.brief === "string" ? JSON.parse(j.job.brief) : j.job.brief;
+  return { ...j.job, brief };
+}
+
+// ---- queue: one build at a time, no duplicates ----
+const queue = [];
+const seen = new Set();   // row_ids queued or building
+let busy = false;
+function enqueue(job) {
+  if (!job || !job.brief || !slugOk(job.brief.slug)) return false;
+  const key = String(job.row_id);
+  if (seen.has(key)) return true;
+  seen.add(key); queue.push(job); pump(); return true;
+}
+async function pump() {
+  if (busy || !queue.length) return;
+  busy = true;
+  const job = queue.shift();
+  const dir = path.join(WORK, `${job.brief.slug}-${Date.now()}`);
+  fs.mkdirSync(dir, { recursive: true });
+  // Real photos the client uploaded in the form land in ~/uploads/<slug>; the agent reads them from ./uploads
+  const up = path.join(UPLOADS, job.brief.slug);
+  if (fs.existsSync(up)) {
+    const dest = path.join(dir, "uploads");
+    fs.mkdirSync(dest, { recursive: true });
+    const files = fs.readdirSync(up).filter(f => !f.startsWith("."));
+    for (const f of files) fs.copyFileSync(path.join(up, f), path.join(dest, f));
+    job.brief.media = job.brief.media || {};
+    job.brief.media.uploads = files.map(f => "uploads/" + f);
+  }
+  fs.writeFileSync(path.join(dir, "brief.json"), JSON.stringify(job.brief, null, 2));
+  console.log(`[${job.brief.slug}] start (row ${job.row_id})`);
+  try {
+    const { url, project } = await build(job, dir);
+    console.log(`[${job.brief.slug}] live ${url}`);
+    await report(job, { status: "preview_pronto", preview_url: url, vercel_project: project });
+  } catch (e) {
+    console.log(`[${job.brief.slug}] ${e.message}`);
+    await report(job, { status: "build_falhou", error: e.message.slice(0, 500) });
+  } finally { limpar(dir, job.brief.slug); seen.delete(String(job.row_id)); busy = false; pump(); }
+}
+
+// ---- HTTP: n8n pushes jobs here (exposed only through Tailscale Funnel) ----
+const safeEq = (a, b) => { const x = Buffer.from(a || ""), y = Buffer.from(b || ""); return x.length === y.length && crypto.timingSafeEqual(x, y); };
+const send = (res, code, obj) => { res.writeHead(code, { "content-type": "application/json" }); res.end(JSON.stringify(obj)); };
+http.createServer(async (req, res) => {
+  if (req.method === "GET" && req.url === "/health") return send(res, 200, { ok: true, busy, queued: queue.length, disco: discoLivre() });
+  if (!safeEq(req.headers.authorization, `Bearer ${RUNNER_SECRET}`)) return send(res, 401, { ok: false });
+  if (req.method === "POST" && req.url === "/build") {
+    let raw = ""; for await (const c of req) { raw += c; if (raw.length > 2e6) return send(res, 413, { ok: false }); }
+    try {
+      const b = JSON.parse(raw);
+      const brief = typeof b.brief === "string" ? JSON.parse(b.brief) : b.brief;
+      const ok = enqueue({ row_id: b.row_id, build_token: b.build_token, brief });
+      return ok ? send(res, 202, { ok: true, queued: queue.length, busy }) : send(res, 400, { ok: false, error: "brief inválido" });
+    } catch { return send(res, 400, { ok: false, error: "json inválido" }); }
+  }
+  if (req.method === "POST" && req.url.startsWith("/upload")) {
+    const q = new URL(req.url, "http://x").searchParams;
+    const slug = q.get("slug"), name = String(q.get("name") || "").replace(/[^A-Za-z0-9._-]/g, "_").slice(-60);
+    if (!slugOk(slug) || !name) return send(res, 400, { ok: false, error: "slug ou name inválido" });
+    const dir = path.join(UPLOADS, slug);
+    fs.mkdirSync(dir, { recursive: true });
+    const chunks = []; let size = 0;
+    for await (const c of req) { size += c.length; if (size > 25e6) return send(res, 413, { ok: false, error: "arquivo grande demais" }); chunks.push(c); }
+    if (!size) return send(res, 400, { ok: false, error: "arquivo vazio" });
+    fs.writeFileSync(path.join(dir, name), Buffer.concat(chunks));
+    console.log(`[${slug}] upload ${name} (${Math.round(size / 1024)} kB)`);
+    return send(res, 201, { ok: true, file: name, bytes: size });
+  }
+  send(res, 404, { ok: false });
+}).listen(+PORT, "127.0.0.1", () => console.log(`frontstep worker listening on 127.0.0.1:${PORT}`));
+
+// On startup only: pick up anything that arrived while this machine was off (a few n8n executions, once).
+(async () => {
+  for (let i = 0; i < 20; i++) {
+    try { const job = await nextJob(); if (!job) break; enqueue(job); }
+    catch (e) { console.log("startup sweep:", e.message); break; }
+  }
+})();

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontstep motion contract fixture</title>
+<link rel="stylesheet" href="../public/frontstep-motion.css">
+<style>
+  body{margin:0;font:18px/1.5 system-ui;color:#17252a;background:#f8f7f2}
+  header{position:sticky;top:0;padding:12px;background:white;z-index:10}
+  section{min-height:75vh;padding:40px;overflow:hidden;border-bottom:1px solid #ddd}
+  figure{margin:0;width:min(60vw,520px);height:360px;background:#496b68;overflow:hidden}
+  img{display:block;width:100%;height:100%;object-fit:cover}
+  .card{display:inline-block;padding:24px;margin:12px;background:#fff;border:1px solid #ddd}
+  .orb{width:140px;height:140px;border:4px solid #ba533c;border-radius:50%}
+  .rail,.progress{height:8px;width:100%;background:#b64134}
+  .progress-track{width:240px;background:#ddd}
+</style>
+<header data-motion-header>Motion test</header>
+<main>
+  <section data-motion-signature="accounting-documents" data-motion-purpose="Order the documents">
+    <h2>Accounting</h2><div class="card" data-motion-part="document">Card A</div><div class="card" data-motion-part="document">Card B</div>
+  </section>
+  <section data-motion-signature="food-photo" data-motion-purpose="Open the photo crop">
+    <h2>Food</h2><figure data-motion-part="photo"><img alt="Test dish" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='360'%3E%3Crect width='520' height='360' fill='%23b86838'/%3E%3C/svg%3E"></figure>
+    <ul data-motion-menu><li data-motion-menu-item><img alt="Test menu item" style="width:48px;height:48px" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23b86838'/%3E%3C/svg%3E">Item</li></ul>
+  </section>
+  <section data-motion-signature="beauty-line" data-motion-purpose="Draw appointment line">
+    <h2>Beauty</h2><svg width="340" height="80" viewBox="0 0 340 80"><path data-motion-part="line" d="M4 50 C120 0 220 90 336 30" fill="none" stroke="black" stroke-width="3"/></svg>
+  </section>
+  <section data-motion-signature="fitness-orbit" data-motion-purpose="Orbit training plan"><h2>Fitness</h2><div class="orb" data-motion-part="orbit"></div></section>
+  <section data-motion-signature="shop-product" data-motion-purpose="Give product tactile focus"><h2>Shop</h2><div class="card" data-motion-part="product"><img data-motion-part="product-image" alt="Test product" style="width:100px;height:100px" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23547d9a'/%3E%3C/svg%3E"></div></section>
+  <section data-motion-signature="lodging-landscape" data-motion-purpose="Drift landscape"><h2>Lodging</h2><figure><img data-motion-part="landscape" alt="Test landscape" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='360'%3E%3Crect width='520' height='360' fill='%236a8e78'/%3E%3C/svg%3E"></figure></section>
+  <section data-motion-signature="industry-process" data-motion-purpose="Extend manufacturing sequence"><h2>Industry</h2><div class="rail" data-motion-part="rail"></div><ol><li data-motion-part="step">Quote</li><li data-motion-part="step">Fabricate</li></ol></section>
+  <section data-motion-signature="repair-path" data-motion-purpose="Draw repair route"><h2>Repair</h2><svg width="340" height="80"><path data-motion-part="path" d="M4 40 H336" fill="none" stroke="black" stroke-width="3"/></svg><div data-motion-part="tool">Tool</div></section>
+  <section data-motion-signature="health-clarity" data-motion-purpose="Show form completion"><h2>Health</h2><div class="progress-track"><div class="progress" data-motion-part="progress"></div></div><label>Name <input data-motion-field></label><label>Need <select data-motion-field><option value="">Choose</option><option value="care">Care</option></select></label></section>
+</main>
+<script defer src="../public/gsap.min.js"></script>
+<script defer src="../public/ScrollTrigger.min.js"></script>
+<script defer src="../public/frontstep-motion.js"></script>
+</html>

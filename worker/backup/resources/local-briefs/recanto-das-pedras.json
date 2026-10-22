@@ -1,0 +1,15 @@
+{
+  "mode":"demo","language":"pt-BR","slug":"recanto-das-pedras","synthetic_fixture":true,
+  "business":{"name":"Recanto das Pedras","niche":"pousada","city":"Serra Negra","neighborhood":null,"one_liner":"Imagine uma pausa entre montanhas e céu aberto","services":[{"name":"Suíte casal","price":null,"description":"Categoria conceitual; estrutura, capacidade e inclusões ainda não confirmadas."},{"name":"Fim de semana","price":null,"description":"Consulta de interesse, sem tarifa ou disponibilidade real."}],"audience":"Casais que desejam conhecer uma proposta de hospedagem tranquila"},
+  "contact":{"whatsapp":"5500000000000","phone":null,"email":null,"address":null,"maps_url":null,"hours":null},
+  "google":{"rating":null,"review_count":null,"reviews":[]},
+  "brand":{"logo_url":null,"colors_seen":["#2F4238","#B99164","#F2EDE3","#778C85"],"vibe":"descanso, paisagem, silêncio","style_hint":"composição ampla, tipografia de viagem, ritmo lento"},
+  "media":{"photos":[
+    {"local_path":"hospedagem-montanhas-referencia-pexels-3149917.jpg","provenance":"licensed_stock","caption":"Paisagem brasileira de referência; não é a vista da pousada fictícia nem Serra Negra.","source_url":"https://www.pexels.com/photo/scenic-photo-of-mountains-during-daytime-3149917/","license":"Pexels License","credit":"Just a Couple Photos / Pexels"},
+    {"local_path":"hospedagem-paisagem-referencia-pexels-9636197.jpg","provenance":"licensed_stock","caption":"Paisagem brasileira de referência; não é o terreno nem a vista da pousada fictícia.","source_url":"https://www.pexels.com/photo/a-grass-field-near-the-mountain-9636197/","license":"Pexels License","credit":"Álvaro Julião / Pexels"}
+  ]},
+  "premium_feature":{"id":"disponibilidade","description":"Consulta de interesse por datas de entrada e saída e número de hóspedes adultos; validar saída posterior à entrada e pelo menos um hóspede. Mostrar resumo antes de abrir mensagem de consulta. Nunca exibir calendário de quartos disponíveis, preço, reserva ou confirmação. data-testid: disponibilidade-entrada, disponibilidade-saida, disponibilidade-hospedes, disponibilidade-resumo, disponibilidade-whatsapp."},
+  "demo_constraints":{"fictitious_notice":"Demonstração fictícia. Não existe pousada nem inventário; nenhuma reserva será recebida.","whatsapp_behavior":"Testar href sem navegar ao WhatsApp.","fallback":"[data-feature-fallback] com contato de demonstração e instrução de consulta manual quando JS estiver desligado."},
+  "content_notes":"As duas paisagens licenciadas são apenas conceito editorial, não fotos de Serra Negra ou da pousada. Fotos reais do espaço, capacidade, inclusões e endereço não existem. Legendar referências e usar data-slot para a estrutura faltante. A prévia depende desses insumos antes de qualquer publicação.",
+  "conversation_notes":"Fixture local; não afirmar disponibilidade, estrutura, localização exata ou serviço não confirmado.","revisions":[],"domain":null
+}

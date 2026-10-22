@@ -1,0 +1,24 @@
+{
+  "mode":"demo", "language":"pt-BR", "slug":"movimento-bairro", "synthetic_fixture":true,
+  "business": {
+    "name":"Movimento do Bairro", "niche":"estúdio de yoga e dança", "city":"Campinas", "neighborhood":"Taquaral",
+    "one_liner":"Encontre uma aula que caiba no seu ritmo",
+    "services":[
+      {"name":"Yoga suave", "price":null, "description":"Sequência acessível e ritmo calmo."},
+      {"name":"Dança livre", "price":null, "description":"Movimento guiado ao som de música."},
+      {"name":"Alongamento", "price":null, "description":"Sessão de movimentos simples para começar."}
+    ],
+    "audience":"Adultos que querem explorar aulas de movimento sem metas de corpo ou desempenho"
+  },
+  "contact":{"whatsapp":"5500000000000","phone":null,"email":null,"address":null,"maps_url":null,"hours":null},
+  "google":{"rating":null,"review_count":null,"reviews":[]},
+  "brand":{"logo_url":null,"colors_seen":["#263D4B","#D77B62","#F2E7D5","#8CA891"],"vibe":"energético sem agressividade, aberto a iniciantes","style_hint":"tipografia expressiva e ritmo assimétrico; sem fotos de corpo como promessa de transformação"},
+  "media":{"photos":[
+    {"local_path":"fitness-estudio-referencia-pexels-35215418.jpg","provenance":"licensed_stock","caption":"Referência visual de estúdio de yoga; não é a estrutura do negócio fictício.","source_url":"https://www.pexels.com/photo/modern-yoga-studio-interior-with-art-installation-35215418/","license":"Pexels License","credit":"eran design / Pexels"},
+    {"local_path":"fitness-tapete-pexels-7318664.jpg","provenance":"licensed_stock","caption":"Referência visual de tapetes; não são equipamentos do negócio fictício.","source_url":"https://www.pexels.com/photo/rolled-yoga-mat-on-shelf-on-the-wall-7318664/","license":"Pexels License","credit":"MART PRODUCTION / Pexels"}
+  ]},
+  "premium_feature":{"id":"avaliacao","description":"Questionário leve de objetivo (mobilidade, expressão ou começar) e frequência pretendida (uma, duas ou três vezes por semana), com sugestão exploratória de modalidade. Mobilidade + duas vezes por semana sugere Yoga suave. Mensagem reúne escolhas e pede conversa sobre aula experimental, sem afirmar que há vaga ou horário. Não coletar peso, medidas, idade, diagnóstico ou condição médica. Expor data-testid avaliacao-objetivo, avaliacao-ritmo, avaliacao-recomendacao e avaliacao-whatsapp."},
+  "demo_constraints":{"fictitious_notice":"Demonstração fictícia. Estúdio, aulas e contato são exemplos; não há matrícula ou aula reservada.","no_real_bookings":true,"whatsapp_behavior":"Inspecionar href; nunca navegar ou enviar mensagem.","fallback":"Com JavaScript desligado, mostrar [data-feature-fallback] e contato de demonstração."},
+  "content_notes":"Não inventar grade de aulas, planos, preços ou endereço. Mostrar quadro de horários e planos como informação a confirmar em conversa, sem dados falsos. Fotos licenciadas são referências visuais, não retratam o estúdio ou suas aulas.",
+  "conversation_notes":"Fixture sintética local. A recomendação não é orientação clínica nem promessa de resultado.", "revisions":[],"domain":null
+}

@@ -1,0 +1,12 @@
+{
+  "steps": [
+    { "action": "select", "selector": "[data-testid='triagem-assunto']", "value": "trocar_contador" },
+    { "action": "select", "selector": "[data-testid='triagem-estagio']", "value": "empresa_ativa" },
+    { "action": "click", "selector": "#review-button" }
+  ],
+  "assertions": [
+    { "kind": "visible", "selector": "#form-error" },
+    { "kind": "text", "selector": "#form-error", "includes": "Preencha assunto, estágio e cidade" },
+    { "kind": "attribute", "selector": "[data-testid='triagem-cidade']", "name": "aria-invalid", "equals": "true" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "mode":"demo","language":"pt-BR","slug":"espaco-cuidado","synthetic_fixture":true,
+  "business":{"name":"Espaço Cuidado","niche":"clínica de fisioterapia","city":"Campinas","neighborhood":null,"one_liner":"Uma interface de consulta para atendimento de fisioterapia","services":[{"name":"Fisioterapia","price":null,"description":"Área demonstrativa, atendimento não oferecido neste projeto."}],"audience":"Pessoas avaliando a clareza de uma futura página de clínica"},
+  "contact":{"whatsapp":"5500000000000","phone":null,"email":null,"address":null,"maps_url":null,"hours":null},
+  "google":{"rating":null,"review_count":null,"reviews":[]},
+  "brand":{"logo_url":null,"colors_seen":["#2A4A56","#ACC8BD","#F5F6F2","#B78D74"],"vibe":"calmo, clínico e legível","style_hint":"tipografia limpa e ilustrações abstratas; sem retrato de profissional fictício"},
+  "media":{"photos":[
+    {"local_path":"saude-sala-referencia-pexels-7016405.jpg","provenance":"licensed_stock","caption":"Sala clínica de referência; não é uma clínica do protótipo fictício.","source_url":"https://www.pexels.com/photo/interior-design-of-a-medical-clinic-7016405/","license":"Pexels License","credit":"enis mekic / Pexels"}
+  ]},
+  "premium_feature":{"id":"agendamento","description":"Pedido de contato sobre consulta com turno preferido e tipo de atendimento geral; não pedir sintomas, queixas, diagnóstico, histórico, CPF ou convênio. Resumo explícito como interesse, sem horário disponível ou confirmação. data-testid: agendamento-turno, agendamento-tipo, agendamento-resumo, agendamento-whatsapp."},
+  "demo_constraints":{"fictitious_notice":"Protótipo fictício de interface de saúde. Não há clínica, profissional registrado nem agendamento real. Publicação e uso com pacientes bloqueados até identificação e registro profissional verificáveis.","whatsapp_behavior":"Inspecionar href sem navegar.","fallback":"[data-feature-fallback] com aviso de protótipo e contato inválido, sem JS."},
+  "content_notes":"Nenhum profissional ou CREFITO foi fornecido: não inventar nome, número, retrato, especialidade, convênios, endereço ou recomendações clínicas. A foto licenciada é apenas referência de sala, nunca prova de instalação. Deixar lacuna explícita no plano e na página; este protótipo não é anúncio de atendimento. Nenhuma imagem de paciente ou cena clínica gerada.",
+  "conversation_notes":"Fixture sintética para testar UI; conteúdo de saúde exige revisão humana antes de qualquer publicação. Nenhuma condição médica é coletada.","revisions":[],"domain":null
+}

@@ -1,0 +1,6 @@
+{
+  "slug": "exemplo-simulado",
+  "business": {"name": "Empresa Fictícia", "niche": "clinica", "city": "Cidade de Teste"},
+  "contact": {"whatsapp": "5500000000000"},
+  "fase": "previa"
+}

@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateDesignPlan} from './design-plan-validation.mjs';
+const fixture=()=>({...Object.fromEntries(['direction','alternative','why','typography','palette','hero','sectionRhythm','feature','visualMaterial','motionConcept','motionFallback'].map(k=>[k,'Concrete decision supported by the synthetic brief.'])),tasteDirectionId:'one-motif',signatureDetails:['a','b','c'],contentClaims:[{claim:'Service A',evidence:'brief.services[0]'},{claim:'Service B',evidence:'brief.services[1]'}],mediaInventory:[],missingInputs:[],motionStoryboard:[{},{},{}],skillApplications:[{},{},{}],renderingMode:'dom',motionRecipe:'Custom CSS and WAAPI, without WebGL.'});
+test('a concrete DOM plan passes; structural failures name the exact repair',()=>{
+ assert.equal(validateDesignPlan(fixture(),['one-motif']).tasteDirectionId,'one-motif');
+ const rich=fixture();rich.motionRecipe={implementation:'Custom CSS and WAAPI.'};assert.throws(()=>validateDesignPlan(rich,['one-motif']),/motionRecipe: a concrete string/);
+ const choice=fixture();choice.tasteDirectionId='unoffered';assert.throws(()=>validateDesignPlan(choice,['one-motif']),/choose exactly one of one-motif/);
+});
+test('plan repair cannot bypass claims or spatial completeness',()=>{
+ const missing=fixture();missing.contentClaims=[];assert.throws(()=>validateDesignPlan(missing,['one-motif']),/claim\/evidence/);
+ const spatial=fixture();spatial.renderingMode='webgl';spatial.motionRecipe='Three.js geometry and camera transitions';assert.throws(()=>validateDesignPlan(spatial,['one-motif']),/Spatial plan needs/);
+});

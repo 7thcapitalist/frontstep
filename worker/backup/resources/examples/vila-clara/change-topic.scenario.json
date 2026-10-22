@@ -1,0 +1,13 @@
+{
+  "steps": [
+    { "action": "select", "selector": "[data-testid='triagem-assunto']", "value": "trocar_contador" },
+    { "action": "select", "selector": "[data-testid='triagem-estagio']", "value": "empresa_ativa" },
+    { "action": "fill", "selector": "[data-testid='triagem-cidade']", "value": "Campinas" },
+    { "action": "click", "selector": "#review-button" },
+    { "action": "select", "selector": "[data-testid='triagem-assunto']", "value": "abrir_empresa" }
+  ],
+  "assertions": [
+    { "kind": "text", "selector": "[data-testid='triagem-resumo']", "includes": "Abrir empresa" },
+    { "kind": "attribute", "selector": "[data-testid='triagem-whatsapp']", "name": "href", "includes": "Abrir%20empresa" }
+  ]
+}

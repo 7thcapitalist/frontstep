@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {verifySpatialPlan} from './design-resources.mjs';
+test('explicitly declining Three.js or WebGL is a valid DOM plan',()=>{
+ for(const motionRecipe of ['CSS e WAAPI, sem importar pacotes e sem carregar Three.js.','CSS without WebGL.','Do not use Three.js; use CSS.','Não usar WebGL; animar com WAAPI.'])assert.equal(verifySpatialPlan({renderingMode:'dom',motionRecipe,spatialPlan:null}),null);
+});
+test('positive and mixed 3D implementation references require the full spatial plan',()=>{
+ for(const motionRecipe of ['Use Three.js and ScrollTrigger','No WebGL in the footer; use Three.js for the hero','CSS buttons; WebGL signature scene'])assert.throws(()=>verifySpatialPlan({motionRecipe}));
+ assert.throws(()=>verifySpatialPlan({renderingMode:'webgl',motionRecipe:'Custom scene'}));
+ assert.throws(()=>verifySpatialPlan({renderingMode:'dom',motionRecipe:'Use Three.js'}));
+});

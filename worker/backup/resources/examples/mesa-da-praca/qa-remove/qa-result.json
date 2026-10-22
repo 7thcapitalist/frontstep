@@ -1,0 +1,300 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "code": "TITLE",
+      "passed": true,
+      "detail": "Mesa da Praça — almoço do seu jeito",
+      "viewport": "desktop"
+    },
+    {
+      "code": "LANG",
+      "passed": true,
+      "detail": "pt-BR",
+      "viewport": "desktop"
+    },
+    {
+      "code": "H1",
+      "passed": true,
+      "detail": "1 h1 elements",
+      "viewport": "desktop"
+    },
+    {
+      "code": "OVERFLOW",
+      "passed": true,
+      "detail": "0px horizontal overflow",
+      "viewport": "desktop"
+    },
+    {
+      "code": "ANCHORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FORM_LABELS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "BUTTON_NAMES",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "IMAGE_ALT",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "IMAGES_LOAD",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "BRIEF_SERVICES",
+      "passed": true,
+      "detail": "4 service names visible",
+      "viewport": "desktop"
+    },
+    {
+      "code": "FOOD_MEDIA_USED",
+      "passed": true,
+      "detail": [
+        "/media/photo-1.jpg",
+        "/media/photo-2.jpg",
+        "/media/photo-3.jpg",
+        "/media/photo-4.jpg"
+      ],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FOOD_MEDIA_FIRST_VIEWPORT",
+      "passed": true,
+      "detail": [
+        {
+          "src": "/media/photo-1.jpg",
+          "fraction": 0.376
+        },
+        {
+          "src": "/media/photo-2.jpg",
+          "fraction": 0
+        },
+        {
+          "src": "/media/photo-3.jpg",
+          "fraction": 0
+        },
+        {
+          "src": "/media/photo-4.jpg",
+          "fraction": 0
+        }
+      ],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FOOD_IMAGE_RICHNESS",
+      "passed": true,
+      "detail": "4 of 4 supplied images used",
+      "viewport": "desktop"
+    },
+    {
+      "code": "MEDIA_SOURCE_CREDITS",
+      "passed": true,
+      "detail": "4 stock photo credits visible",
+      "viewport": "desktop"
+    },
+    {
+      "code": "DEMO_DISCLOSURE",
+      "passed": true,
+      "detail": "Visible fictitious/demo disclosure",
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_PRESENT",
+      "passed": true,
+      "detail": "pedido: 1 matching regions",
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_SCENARIO",
+      "passed": true,
+      "detail": "4 steps, 2 assertions",
+      "viewport": "desktop"
+    },
+    {
+      "code": "CONSOLE_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "HTTP_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "desktop"
+    },
+    {
+      "code": "FEATURE_NO_JS_FALLBACK",
+      "passed": true,
+      "detail": "Para experimentar sem JavaScript, consulte o cardápio acima. O contato e os preços são exemplos fictícios; nenhum pedido pode ser enviado aqui.",
+      "viewport": "desktop"
+    },
+    {
+      "code": "TITLE",
+      "passed": true,
+      "detail": "Mesa da Praça — almoço do seu jeito",
+      "viewport": "mobile"
+    },
+    {
+      "code": "LANG",
+      "passed": true,
+      "detail": "pt-BR",
+      "viewport": "mobile"
+    },
+    {
+      "code": "H1",
+      "passed": true,
+      "detail": "1 h1 elements",
+      "viewport": "mobile"
+    },
+    {
+      "code": "OVERFLOW",
+      "passed": true,
+      "detail": "0px horizontal overflow",
+      "viewport": "mobile"
+    },
+    {
+      "code": "ANCHORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FORM_LABELS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "BUTTON_NAMES",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "IMAGE_ALT",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "IMAGES_LOAD",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "BRIEF_SERVICES",
+      "passed": true,
+      "detail": "4 service names visible",
+      "viewport": "mobile"
+    },
+    {
+      "code": "FOOD_MEDIA_USED",
+      "passed": true,
+      "detail": [
+        "/media/photo-1.jpg",
+        "/media/photo-2.jpg",
+        "/media/photo-3.jpg",
+        "/media/photo-4.jpg"
+      ],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FOOD_MEDIA_FIRST_VIEWPORT",
+      "passed": true,
+      "detail": [
+        {
+          "src": "/media/photo-1.jpg",
+          "fraction": 0.269
+        },
+        {
+          "src": "/media/photo-2.jpg",
+          "fraction": 0
+        },
+        {
+          "src": "/media/photo-3.jpg",
+          "fraction": 0
+        },
+        {
+          "src": "/media/photo-4.jpg",
+          "fraction": 0
+        }
+      ],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FOOD_IMAGE_RICHNESS",
+      "passed": true,
+      "detail": "4 of 4 supplied images used",
+      "viewport": "mobile"
+    },
+    {
+      "code": "MEDIA_SOURCE_CREDITS",
+      "passed": true,
+      "detail": "4 stock photo credits visible",
+      "viewport": "mobile"
+    },
+    {
+      "code": "DEMO_DISCLOSURE",
+      "passed": true,
+      "detail": "Visible fictitious/demo disclosure",
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_PRESENT",
+      "passed": true,
+      "detail": "pedido: 1 matching regions",
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_SCENARIO",
+      "passed": true,
+      "detail": "4 steps, 2 assertions",
+      "viewport": "mobile"
+    },
+    {
+      "code": "CONSOLE_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "HTTP_ERRORS",
+      "passed": true,
+      "detail": [],
+      "viewport": "mobile"
+    },
+    {
+      "code": "FEATURE_NO_JS_FALLBACK",
+      "passed": true,
+      "detail": "Para experimentar sem JavaScript, consulte o cardápio acima. O contato e os preços são exemplos fictícios; nenhum pedido pode ser enviado aqui.",
+      "viewport": "mobile"
+    }
+  ],
+  "screenshots": {
+    "desktop": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\mesa-da-praca\\qa-remove\\desktop.png",
+    "desktopFeature": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\mesa-da-praca\\qa-remove\\desktop-feature.png",
+    "desktopNoJs": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\mesa-da-praca\\qa-remove\\desktop-nojs.png",
+    "mobile": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\mesa-da-praca\\qa-remove\\mobile.png",
+    "mobileFeature": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\mesa-da-praca\\qa-remove\\mobile-feature.png",
+    "mobileNoJs": "C:\\Users\\joaov\\Documents\\Codex\\2026-10-15\\website-factory-heitor\\frontstep\\local-factory\\examples\\mesa-da-praca\\qa-remove\\mobile-nojs.png"
+  },
+  "startedAt": "2026-10-16T21:39:22.247Z",
+  "finishedAt": "2026-10-16T21:39:29.089Z",
+  "exitCode": 0
+}

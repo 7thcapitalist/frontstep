@@ -1,0 +1,11 @@
+[
+  { "family": "comida", "label": "Restaurante", "name": "Mesa da Praça", "slug": "mesa-da-praca", "brief": "restaurante-praca-do-sol" },
+  { "family": "juridico_contabil", "label": "Contabilidade", "name": "Vila Clara", "slug": "vila-clara", "brief": "contabilidade-vila-clara" },
+  { "family": "saude", "label": "Saúde", "name": "Espaço Cuidado", "slug": "espaco-cuidado", "brief": "espaco-cuidado" },
+  { "family": "beleza", "label": "Beleza", "name": "Ateliê Aurora", "slug": "atelie-aurora", "brief": "atelie-aurora" },
+  { "family": "fitness", "label": "Fitness", "name": "Movimento do Bairro", "slug": "movimento-bairro", "brief": "movimento-bairro" },
+  { "family": "loja", "label": "Loja", "name": "Casa do Papel", "slug": "casa-do-papel", "brief": "casa-do-papel" },
+  { "family": "hospedagem_eventos", "label": "Hospedagem", "name": "Recanto das Pedras", "slug": "recanto-das-pedras", "brief": "recanto-das-pedras" },
+  { "family": "industria_b2b", "label": "Indústria", "name": "Metal Linha", "slug": "metal-linha", "brief": "metal-linha" },
+  { "family": "servico_local", "label": "Serviço local", "name": "Conserta Bairro", "slug": "conserta-bairro", "brief": "conserta-bairro" }
+]

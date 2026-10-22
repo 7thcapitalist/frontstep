@@ -1,0 +1,15 @@
+{
+  "mode":"demo","language":"pt-BR","slug":"metal-linha","synthetic_fixture":true,
+  "business":{"name":"Metal Linha","niche":"usinagem industrial","city":"Campinas","neighborhood":null,"one_liner":"Especifique sua peça para iniciar uma cotação organizada","services":[{"name":"Usinagem sob desenho","price":null,"description":"Consulta inicial para peça com desenho técnico."},{"name":"Peças seriadas","price":null,"description":"Consulta inicial sobre lotes e repetibilidade."}],"audience":"Compradores industriais e responsáveis por engenharia que precisam descrever demanda técnica"},
+  "contact":{"whatsapp":"5500000000000","phone":null,"email":null,"address":null,"maps_url":null,"hours":null},
+  "google":{"rating":null,"review_count":null,"reviews":[]},
+  "brand":{"logo_url":null,"colors_seen":["#263740","#B66E45","#E6E9E7","#77949D"],"vibe":"técnico e direto","style_hint":"grade modular, medidas e fluxos visuais, sem adjetivos vagos"},
+  "media":{"photos":[
+    {"local_path":"industria-cnc-referencia-pexels-10119310.jpg","provenance":"licensed_stock","caption":"Referência visual de CNC; não é máquina ou capacidade da fábrica fictícia.","source_url":"https://www.pexels.com/photo/tool-in-factory-10119310/","license":"Pexels License","credit":"Harold Granados / Pexels"},
+    {"local_path":"industria-torno-referencia-pexels-15603045.jpg","provenance":"licensed_stock","caption":"Referência visual de torno; não é equipamento da fábrica fictícia.","source_url":"https://www.pexels.com/photo/lathe-in-workshop-15603045/","license":"Pexels License","credit":"cnrdmroglu / Pexels"}
+  ]},
+  "premium_feature":{"id":"triagem","description":"Pedido de orçamento com tipo de peça/serviço, material, quantidade inteira positiva e prazo desejado. Resumo estruturado e mensagem de consulta, sem upload ou dado corporativo sensível. Não prometer tolerância, capacidade de máquina, prazo ou certificação. data-testid: triagem-servico, triagem-material, triagem-quantidade, triagem-prazo, triagem-resumo, triagem-whatsapp."},
+  "demo_constraints":{"fictitious_notice":"Demonstração fictícia. Fábrica, serviços e contato são exemplos; nenhum orçamento será recebido.","whatsapp_behavior":"Inspecionar href, nunca navegar ou enviar.","fallback":"[data-feature-fallback] com instrução e contato de demonstração sem JS."},
+  "content_notes":"Não há certificações, números de capacidade, lista de máquinas, tolerâncias, setores confirmados, endereço ou fotos próprias da fábrica. As imagens licenciadas são referências de processo e não evidência de equipamento disponível. Marcar ausências no plano; não inventar métricas técnicas.",
+  "conversation_notes":"Fixture local para testar triagem de cotação B2B. O formulário é apenas uma demonstração de interface.","revisions":[],"domain":null
+}

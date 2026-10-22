@@ -1,0 +1,15 @@
+{
+  "mode":"demo","language":"pt-BR","slug":"conserta-bairro","synthetic_fixture":true,
+  "business":{"name":"Conserta Bairro","niche":"assistência técnica de eletrodomésticos","city":"Campinas","neighborhood":"Taquaral","one_liner":"Descreva o aparelho para pedir uma visita de avaliação","services":[{"name":"Geladeira","price":null,"description":"Pedido de avaliação, sem diagnóstico remoto."},{"name":"Máquina de lavar","price":null,"description":"Pedido de avaliação, sem promessa de reparo."},{"name":"Micro-ondas","price":null,"description":"Pedido de avaliação, sem preço estimado."}],"audience":"Moradores do Taquaral e bairros próximos que buscam uma conversa inicial sobre conserto"},
+  "contact":{"whatsapp":"5500000000000","phone":null,"email":null,"address":null,"maps_url":null,"hours":null},
+  "google":{"rating":null,"review_count":null,"reviews":[]},
+  "brand":{"logo_url":null,"colors_seen":["#314653","#DB9D43","#F6F2E8","#759296"],"vibe":"prático e cordial","style_hint":"elementos inspirados em etiquetas de oficina e diagramas simples, sem falsa foto de equipe"},
+  "media":{"photos":[
+    {"local_path":"servico-bancada-referencia-pexels-32588547.jpg","provenance":"licensed_stock","caption":"Bancada de referência; não é ferramenta ou reparo do serviço fictício.","source_url":"https://www.pexels.com/photo/diy-repair-tools-and-disassembled-appliance-flat-lay-32588547/","license":"Pexels License","credit":"Bulat843 / Pexels"},
+    {"local_path":"servico-ferramentas-referencia-pexels-11882650.jpg","provenance":"licensed_stock","caption":"Ferramentas de referência; não são do serviço fictício.","source_url":"https://www.pexels.com/photo/hand-tools-in-gray-toolbox-11882650/","license":"Pexels License","credit":"Carlos Zael / Pexels"}
+  ]},
+  "premium_feature":{"id":"agendamento","description":"Pedido de visita com tipo de aparelho, bairro e turno preferido; resumo antes de mensagem. Não solicitar endereço completo, telefone nem modelo/serial obrigatório. Não mostrar vagas reais, disponibilidade de técnico, preço ou prazo. data-testid: agendamento-aparelho, agendamento-bairro, agendamento-turno, agendamento-resumo, agendamento-whatsapp."},
+  "demo_constraints":{"fictitious_notice":"Demonstração fictícia. Serviço e contato são exemplos; nenhuma visita será agendada.","whatsapp_behavior":"Inspecionar href sem navegar.","fallback":"[data-feature-fallback] com instrução e contato demonstrativo sem JS."},
+  "content_notes":"Área atendida apenas como Taquaral e bairros próximos, sem lista específica. Não inventar preço, garantia, tempo de resposta, endereço ou depoimento. As imagens licenciadas são referências de ferramentas e não mostram o serviço fictício.",
+  "conversation_notes":"Fixture sintética local. Nada neste brief descreve operação real.","revisions":[],"domain":null
+}

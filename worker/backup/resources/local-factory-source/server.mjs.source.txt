@@ -1,0 +1,529 @@
+#!/usr/bin/env node
+import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
+import { createHash, randomUUID } from 'node:crypto';
+import { mkdir, readFile, writeFile, rename, readdir, stat, copyFile, unlink, realpath } from 'node:fs/promises';
+import { createWriteStream, existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { installMotionResources, motionGuidance, verifySkillUsage, assessReview, verifySpatialPlan } from './design-resources.mjs';
+import { previewEligibility } from './preview-eligibility.mjs';
+import { validateDesignPlan } from './design-plan-validation.mjs';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const frontstep = path.resolve(here, '..');
+const jobsDir = path.join(here, 'jobs');
+const examplesRoot = path.join(here, 'examples');
+const exampleCatalog = JSON.parse(await readFile(path.join(examplesRoot, 'catalog.json'), 'utf8'));
+const localMediaRoot = path.join(frontstep, 'local-briefs', 'assets');
+const qaScript = path.join(frontstep, 'local-qa', 'qa.mjs');
+const motionScript = path.join(frontstep, 'local-qa', 'motion-audit.mjs');
+const builderRefs = path.join(frontstep, 'builder', 'skills', 'frontstep-coder', 'references');
+const designKit = path.join(here, 'design-kit');
+const fontKit = path.join(designKit, 'fonts');
+const skillsRoot = path.join(designKit, 'skills');
+const tasteSkill = path.join(designKit, 'skills', 'taste-skill');
+const tasteDraw = path.join(tasteSkill, 'scripts', 'draw.mjs');
+const tasteDirections = JSON.parse(await readFile(path.join(tasteSkill, 'library', 'directions.json'), 'utf8'));
+const uiProSearch = path.join(builderRefs, 'scripts', 'ui-ux-pro-max', 'scripts', 'search.py');
+const host = '127.0.0.1';
+const port = Number(process.env.FRONTSTEP_LOCAL_PORT || 4178);
+const codex = process.env.FRONTSTEP_CODEX || 'codex';
+const requestedEffort = process.env.FRONTSTEP_CODEX_REASONING_EFFORT || 'high';
+const codexEffort = ['medium', 'high', 'xhigh'].includes(requestedEffort) ? ['-c', `model_reasoning_effort="${requestedEffort}"`] : ['-c', 'model_reasoning_effort="high"'];
+const buildMs = Number(process.env.FRONTSTEP_BUILD_TIMEOUT_MS || 1_200_000);
+const qaMs = Number(process.env.FRONTSTEP_QA_TIMEOUT_MS || 180_000);
+const motionMs = Number(process.env.FRONTSTEP_MOTION_TIMEOUT_MS || 120_000);
+const reviewMs = Number(process.env.FRONTSTEP_REVIEW_TIMEOUT_MS || 360_000);
+const requestedRepairs = Number(process.env.FRONTSTEP_MAX_REPAIR ?? 4);
+const maxRepair = Number.isInteger(requestedRepairs) ? Math.min(5, Math.max(0, requestedRepairs)) : 4;
+const jobs = new Map();
+let busy = false;
+let closing = false;
+
+function cleanEnv() {
+  const allowed = ['PATH', 'Path', 'SystemRoot', 'WINDIR', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'TEMP', 'TMP', 'CODEX_HOME', 'COMSPEC', 'PATHEXT', 'LANG'];
+  return Object.fromEntries(allowed.filter(k => process.env[k] !== undefined).map(k => [k, process.env[k]]));
+}
+function digest(value) { return createHash('sha256').update(JSON.stringify(value)).digest('hex'); }
+function jobPath(id) { return path.join(jobsDir, id); }
+function liveOwner(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try { process.kill(pid, 0); return true; }
+  catch (error) { return error.code === 'EPERM'; }
+}
+function nicheFamily(niche) {
+  const text = String(niche || '').toLowerCase();
+  if (/restaurante|hamburguer|pizzaria|lanchonete|padaria|confeitaria|açaí|acai|bar\b|caf[eé]|marmita|food truck/.test(text)) return 'comida';
+  if (/advog|jur[ií]d|contab|despach|tribut[aá]ri/.test(text)) return 'juridico_contabil';
+  if (/m[eé]dic|cl[ií]nica|sa[uú]de|dentist|fisioter|psic[oó]log|nutricion|fonoaudi|terapia/.test(text)) return 'saude';
+  if (/sal[aã]o|cabeleireir|cabelo|barbear|manicure|est[eé]tica|sobrancelh|c[ií]li|maquiag|tatuag|spa\b/.test(text)) return 'beleza';
+  if (/academia|personal|pilates|crossfit|luta|dan[cç]a|yoga|fitness|est[uú]dio de treino/.test(text)) return 'fitness';
+  if (/loja|boutique|floricultur|pet shop|mercado|papelaria|e-commerce|com[eé]rcio/.test(text)) return 'loja';
+  if (/pousada|hotel|chal[eé]|hospedag|hostel|resort|evento|buffet|festa|s[ií]tio|casamento/.test(text)) return 'hospedagem_eventos';
+  if (/ind[uú]stri|f[aá]brica|usinagem|metal[uú]rg|distribuidor|gr[aá]fica|manufatura|b2b/.test(text)) return 'industria_b2b';
+  return 'servico_local';
+}
+async function installExemplar(brief, referenceDir) {
+  const family = nicheFamily(brief.business?.niche);
+  const item = exampleCatalog.find(entry => entry.brief === brief.slug) || exampleCatalog.find(entry => entry.family === family);
+  if (!item || !/^[a-z0-9-]+$/.test(item.slug)) return null;
+  const source = path.join(examplesRoot, item.slug);
+  const qa = await readFile(path.join(source, 'qa', 'qa-result.json'), 'utf8').then(JSON.parse).catch(() => null);
+  if (qa?.passed !== true) return null;
+  const target = path.join(referenceDir, 'exemplar');
+  await mkdir(target, { recursive: true });
+  for (const name of await readdir(path.join(source, 'public'))) {
+    if (/\.(html|css|js)$/i.test(name)) await copyFile(path.join(source, 'public', name), path.join(target, name));
+  }
+  for (const name of ['desktop.png', 'mobile.png']) await copyFile(path.join(source, 'qa', name), path.join(target, name));
+  await copyFile(path.join(source, 'README.md'), path.join(target, 'case-study.md'));
+  await writeFile(path.join(target, 'README.md'), `# Starter design system: ${item.name}\n\nFamily: ${family}. This is a QA-approved synthetic example, not evidence for ${brief.business?.name || brief.slug}. Study desktop.png, mobile.png, the source and case-study.md for composition, interaction, responsive hierarchy and image honesty. Reuse its locally authored layout and behavior where they serve the current brief, then adapt the brand expression. Replace every sample fact and photograph with the current brief's validated facts and media; do not copy the example's business identity, prices, contacts or unsupported claims.\n`);
+  return { family, slug: item.slug, desktop: path.join(target, 'desktop.png'), mobile: path.join(target, 'mobile.png') };
+}
+async function atomicJson(file, value) {
+  const temp = `${file}.${randomUUID()}.tmp`;
+  await writeFile(temp, JSON.stringify(value, null, 2) + '\n');
+  await rename(temp, file);
+}
+async function save(job) { await atomicJson(path.join(jobPath(job.id), 'job.json'), job); }
+async function publicDigest(root) {
+  const hash = createHash('sha256');
+  async function walk(folder, prefix = '') {
+    for (const entry of (await readdir(folder, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+      const relative = prefix + entry.name;
+      if (entry.isDirectory()) await walk(path.join(folder, entry.name), relative + '/');
+      else if (entry.isFile()) { hash.update(relative + '\0'); hash.update(await readFile(path.join(folder, entry.name))); }
+    }
+  }
+  await walk(root);
+  return hash.digest('hex');
+}
+function respond(res, code, data) {
+  res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+  res.end(JSON.stringify(data));
+}
+async function bodyJson(req) {
+  let body = '';
+  for await (const chunk of req) {
+    body += chunk;
+    if (body.length > 100_000) throw new Error('Body exceeds 100 KB');
+  }
+  return JSON.parse(body);
+}
+function validate(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('JSON object required');
+  const { brief, scenario, idempotencyKey } = input;
+  if (!brief || typeof brief !== 'object' || Array.isArray(brief)) throw new Error('brief object required');
+  if (typeof brief.slug !== 'string' || !/^[a-z][a-z0-9-]{2,48}$/.test(brief.slug)) throw new Error('Invalid brief.slug');
+  if (brief.mode !== 'demo' || brief.synthetic_fixture !== true) throw new Error('Only synthetic demo briefs are accepted');
+  const niche = String(brief.business?.niche || '').toLowerCase();
+  const food = /restaurante|hamburguer|pizzaria|lanchonete|padaria|confeitaria|açaí|acai|bar\b|caf[eé]|marmita|food truck/.test(niche);
+  const photos = brief.media?.photos || [];
+  if (!Array.isArray(photos) || photos.length > 12) throw new Error('Invalid media.photos: expected up to 12 photos');
+  if (food && !photos.length) throw new Error('Missing media.photos: food demos need at least one local image asset before building');
+  if (food && !photos.some(photo => ['business_photo', 'licensed_stock'].includes(photo?.provenance))) {
+    throw new Error('Food demos need at least one real business or licensed-stock photograph; generated art alone is insufficient');
+  }
+  for (const photo of photos) {
+    if (!photo || typeof photo.local_path !== 'string' || !/^[a-zA-Z0-9_./-]+\.(jpe?g|png|webp)$/i.test(photo.local_path)
+      || photo.local_path.startsWith('/') || photo.local_path.includes('..')) {
+      throw new Error('Invalid media.photos: use local image files under frontstep/local-briefs/assets and set local_path');
+    }
+    if (!['business_photo', 'licensed_stock', 'generated_illustration'].includes(photo.provenance)) throw new Error('Invalid media.photos provenance');
+    if (photo.provenance === 'licensed_stock' && (!photo.source_url || !photo.license || !photo.credit)) throw new Error('Stock media requires source_url, license and credit');
+    const source = path.resolve(localMediaRoot, photo.local_path);
+    if (!source.startsWith(localMediaRoot + path.sep) || !existsSync(source)) throw new Error(`Invalid media.photos local_path: ${photo.local_path}`);
+  }
+  if (scenario !== undefined && (typeof scenario !== 'object' || Array.isArray(scenario))) throw new Error('scenario must be an object');
+  if (idempotencyKey !== undefined && (typeof idempotencyKey !== 'string' || !/^[a-zA-Z0-9_-]{8,100}$/.test(idempotencyKey))) throw new Error('Invalid idempotencyKey');
+  return { brief, scenario, key: idempotencyKey || digest(brief) };
+}
+function tasteArgs(brief) {
+  const family = nicheFamily(brief.business?.niche);
+  const [sector, sections, tone] = {
+    comida: ['restaurant', 'list,showcase,contact,footer', 'warm'],
+    juridico_contabil: ['finance', 'intro,list,showcase,contact,footer', 'editorial'],
+    saude: ['health', 'intro,list,showcase,contact,footer', 'quiet'],
+    beleza: ['fashion', 'intro,list,showcase,contact,footer', 'editorial'],
+    fitness: ['other', 'list,showcase,intro,contact,footer', 'bold'],
+    loja: ['ecommerce', 'list,showcase,cta,footer', 'playful'],
+    hospedagem_eventos: ['hospitality', 'intro,gallery,showcase,contact,footer', 'warm'],
+    industria_b2b: ['physical-product', 'showcase,list,how-it-works,contact,footer', 'technical'],
+    servico_local: ['other', 'intro,showcase,list,contact,footer', 'technical']
+  }[family];
+  const summary = `${brief.business?.name || brief.slug}: ${brief.business?.niche || ''}; ${brief.business?.one_liner || ''}`.slice(0, 300);
+  const args = [tasteDraw, '--sector', sector, '--brief', summary, '--sections', sections, '--tone', tone];
+  if (brief.brand?.colors_seen?.length) args.push('--keep', 'palette');
+  // The skill's --have photography means the project's OWN photography, not stock.
+  if (brief.media?.photos?.some(photo => photo.provenance === 'business_photo')) args.push('--have', 'photography');
+  const avoid = new Set((brief.media?.photos?.length || 0) < 4 ? tasteDirections.filter(direction => direction.needsPictures).map(direction => direction.id) : []);
+  if (!brief.media?.photos?.length) for (const id of ['dark-room', 'place-carries-it', 'hero-object', 'specimen-catalogue']) avoid.add(id);
+  if (avoid.size) args.push('--avoid', [...avoid].join(','));
+  return args;
+}
+function researchQuery(brief) {
+  const subjects = { comida: 'restaurant dining food menu editorial', juridico_contabil: 'accounting professional services finance diagnostic', saude: 'healthcare clinic appointment accessible calm', beleza: 'beauty salon editorial booking', fitness: 'fitness gym classes schedule energetic', loja: 'retail ecommerce product catalog', hospedagem_eventos: 'hospitality boutique hotel travel lodging', industria_b2b: 'industrial manufacturing B2B engineering quote', servico_local: 'home repair local service scheduling' };
+  return `${subjects[nicheFamily(brief.business?.niche)]} ${brief.business?.niche || ''} ${brief.premium_feature?.id || ''}`.slice(0, 280);
+}
+function researchDials(brief) {
+  const [variance, motion, density] = { comida: [8, 7, 5], juridico_contabil: [6, 5, 5], saude: [5, 4, 4], beleza: [8, 6, 3], fitness: [8, 7, 5], loja: [8, 6, 5], hospedagem_eventos: [9, 6, 3], industria_b2b: [8, 6, 6], servico_local: [7, 5, 5] }[nicheFamily(brief.business?.niche)];
+  return ['--variance', String(variance), '--motion', String(motion), '--density', String(density)];
+}
+function publicJob(job) {
+  return { ...job, brief: undefined, scenario: undefined, statusUrl: `/jobs/${job.id}`, previewUrl: job.state === 'succeeded' ? `/preview/${job.id}/` : null };
+}
+async function runProcess(command, args, options) {
+  const { cwd, stdin, stdoutFile, stderrFile, timeoutMs } = options;
+  return new Promise(resolve => {
+    const out = createWriteStream(stdoutFile, { flags: 'a' });
+    const err = createWriteStream(stderrFile, { flags: 'a' });
+    let settled = false;
+    let child;
+    let hardTimer;
+    let timeoutReason = null;
+    const finish = result => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      clearTimeout(hardTimer);
+      out.end(); err.end();
+      resolve(result);
+    };
+    let timer;
+    try {
+      child = spawn(command, args, { cwd, env: cleanEnv(), windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    } catch (e) { out.end(); err.end(); resolve({ ok: false, reason: `spawn: ${e.message}` }); return; }
+    child.stdout.pipe(out, { end: false });
+    child.stderr.pipe(err, { end: false });
+    child.on('error', e => finish({ ok: false, reason: `spawn: ${e.message}` }));
+    child.on('close', (code, signal) => finish({ ok: code === 0 && !timeoutReason, code, signal, reason: timeoutReason || (code === 0 ? null : `exit ${code ?? signal}`) }));
+    timer = setTimeout(() => {
+      timeoutReason = `timeout after ${timeoutMs}ms`;
+      child.kill('SIGTERM');
+      hardTimer = setTimeout(() => { child.kill('SIGKILL'); finish({ ok: false, reason: timeoutReason }); }, 5000);
+    }, timeoutMs);
+    if (stdin) child.stdin.end(stdin); else child.stdin.end();
+  });
+}
+function designPrompt(brief) {
+  return `You are the dedicated Frontstep Builder Agent, ART DIRECTION phase. Read reference/BUILDER-AGENT.md. Use frontend-design as the primary art director for this brief; the taste direction is a candidate composition, not a competing set of style mandates. Use other supplied skills only for a concrete implementation or diagnostic need. Do not stack every aesthetic prompt. Read brief.json, reference/DESIGN-WORKFLOW.md, reference/frontstep-coder.md, reference/frontend-design.md, reference/taste-options.md, reference/taste-copy.md, reference/taste-imagery.md, reference/media-manifest.json, reference/font-library.md, reference/design-research.md, reference/nichos.md, reference/direction.md, reference/motion-opportunities.md. The optional minimalist-ui and gpt-taste references are alternatives, not mandatory visual rules. Treat incompatible stylistic absolutes as options, not commands. Use the actual brief and the media inventory with provenance. Your sole deliverable is design-plan.json in this directory. It must be valid JSON with nonempty string fields direction, alternative, why, typography, palette, hero, sectionRhythm, feature, visualMaterial, tasteDirectionId, motionConcept, motionFallback, and an array signatureDetails with at least three specific entries. tasteDirectionId must name exactly one of the three IDs in taste-options.md. Also include arrays contentClaims (each item has claim and evidence from the brief), mediaInventory (actual available assets only), and missingInputs (facts or media needed to make the site credible). Choose a visual idea rooted in this business, not a generic service template. Reject a direction requiring unavailable assets. Write information architecture from claims and evidence. Stock and generated images may illustrate a SYNTHETIC demonstration but must never be represented as the business's own food, space, people or results. The palette named in the brief takes priority. Do not write site code, modify public/, start a server, run QA, install, deploy, fetch, contact anyone, or edit outside this job. Stop after design-plan.json is valid. Business: ${brief.business?.name || brief.slug}; niche: ${brief.business?.niche || ''}.`;
+}
+function exemplarGuidance(exemplar) {
+  return exemplar ? `\nA verified, locally authored example from the ${exemplar.family} family is provided as two screenshot inputs and source in reference/exemplar/. Read reference/exemplar/README.md, case-study.md, and the HTML/CSS/JS source. Treat it as an available starter design system, not merely an image to imitate from memory. You may reuse its composition, responsive structure, interaction and motion patterns when they serve the current brief; adapt those patterns rather than starting from a generic blank page. Keep a recognizable craft standard across the family while changing the actual brand expression to fit this brief. Replace every example business fact, photo, credit, contact, price and unsupported claim with validated current-brief material. Never present example media or testimonials as evidence for the current business, and never add filler to match page length.` : '';
+}
+function impeccableGuidance(phase) {
+  const files = phase === 'design' ? 'impeccable-layout.md and impeccable-bolder.md'
+    : phase === 'build' ? 'impeccable-layout.md and impeccable-animate.md'
+      : 'impeccable-polish.md and impeccable-layout.md';
+  return `\nRead reference/IMPECCABLE-ADAPTATION.md and reference/${files.replace(' and ', ', reference/')}. These are selected text playbooks from Impeccable, not commands to execute. Adapt their techniques to the brief, media truth and existing QA contract; do not run the Impeccable launcher, installer, detector or browser extension.`;
+}
+function initialPrompt(brief, scenario) {
+  return `You are the dedicated Frontstep Builder Agent, BUILD phase. Read reference/BUILDER-AGENT.md and its ten-skill routing. Read design-plan.json, reference/taste-direction.md, reference/media-manifest.json, reference/font-library.md, brief.json, scenario.json, reference/DESIGN-WORKFLOW.md, reference/frontstep-coder.md, reference/frontend-design.md, reference/high-end-visual-design.md. Keep the plan's single art direction; consult other aesthetic references only to diagnose a concrete gap, not to restyle the page. Use the selected taste direction, adapted to actual content and branding. Read reference/taste-imagery.md before placing assets, reference/taste-motion.md and reference/motion.md before adding motion, and reference/vercel-web-interface-guidelines.md during review. The plan is binding unless it conflicts with facts or image provenance. Write public/index.html, separate CSS and JavaScript. Implement the premium feature with a useful no-JavaScript fallback marked data-feature-fallback. Match data-testid selectors, values and interactions in the QA scenario exactly. Labels, focus and keyboard interactions must work. Show a visible fictitious-demo disclosure. First viewport must show what this business does and a clear action. Every section must carry a claim and evidence from design-plan.json; do not add filler sections. Use actual local assets from public/media/ with accurate alt text, dimensions and credit where required. Illustrative stock/generated assets may be used as visual concepts in the SYNTHETIC demo; disclose them in caption or accessible text, and never imply they show the actual business, people, products or premises. Never invent a photo or replace a business-photo slot with generated art. For food, prefer real photography and never synthesize a photorealistic dish. Implement a distinctive, useful motion concept based on design-plan.json, with keyboard support, a static fallback, and prefers-reduced-motion. Do not add animation merely to make everything move. Avoid generic ornaments, oversized empty sections, tiny mobile text, repeated card rows and default layouts. Use an intentional self-hosted font from public/fonts/ rather than a browser default; do not fetch fonts at runtime. Use no external scripts or services; local assets and meaningful inline SVG are okay. Do not collect or submit real data, add analytics, deploy, install packages, or message anyone. Do not invent reviews, availability, photos or certifications. Keep links local or inert except a demonstrative wa.me URL. The worker will run browser QA and visual review; do not start a server or run QA yourself. Edit only this job directory. Brief:\n${JSON.stringify(brief, null, 2)}\nScenario:\n${JSON.stringify(scenario || {}, null, 2)}`;
+}
+function repairPrompt(feedback) {
+  return `You are the dedicated Frontstep Builder Agent, REDESIGN phase. Improve the website in public/ using the concrete QA or visual review below. Read reference/BUILDER-AGENT.md, brief.json, scenario.json, design-plan.json, reference/DESIGN-WORKFLOW.md, reference/redesign-existing-projects.md, reference/web-design-guidelines.md, reference/vercel-web-interface-guidelines.md, reference/taste-critique.md, the existing site files and the feedback. Treat redesign and minimalism as diagnostic/design options; reject placeholder imagery or style rules that conflict with the brief. Preserve the working premium feature, demo disclosure, reduced-motion behavior and no-JavaScript fallback. Fix every concrete issue; do not merely explain or dismiss the critique. If the critique says the first viewport, composition, typography or rhythm is generic or undercomposed, make a structural change to the layout and hierarchy; changing only copy, color, borders or spacing is insufficient. Give the strongest truthful photograph an intentional visual role and readable external credit where available. If the mobile choice-to-action path is too long, remove redundant explanation and empty reserved height so selection, feedback and action are close together. Where the review asks for proof or imagery that the brief does not provide, improve composition and truthful specificity instead of fabricating people, credentials, reviews, numbers or product photos. Inspect and repair motion source as well as static layout. The worker will rerun browser QA and visual review; do not start a server or run browser QA yourself. Do not deploy, use external services or collect real data. Feedback:\n${feedback.slice(0, 20_000)}`;
+}
+function visualReviewPrompt(brief) {
+  return `You are the dedicated Frontstep Builder Agent, INDEPENDENT CRITIQUE phase. Judge the current artifact without prior grades: do not read previous visual-review files, job history or self-awarded ratings. The fixed rubric and its thresholds remain binding; historical scores are not targets. Review the browser screenshot set and motion storyboard of a LOCAL SYNTHETIC site for ${brief.business?.name || brief.slug} (${brief.business?.niche || 'local business'}): desktop initial, mobile initial, and mobile with the feature populated. Read reference/BUILDER-AGENT.md, scenario.json, reference/taste-critique.md, reference/media-manifest.json, reference/web-design-guidelines.md, reference/vercel-web-interface-guidelines.md, and public CSS/JS. Judge visual quality from screenshots, not builder claims. Score 0–10 for business specificity, first viewport, composition, typography, hierarchy, content density, rhythm, mobile legibility and credible visual material. Inspect whether the site feels templated, empty, repetitive, cartoonish, cramped or generic. Check every image against provenance: business photos must be well cropped; stock/generated assets must read as illustrative, not claimed as the business's own. Evaluate the mobile path from feature choice to feedback and action. Inspect CSS/JS for a purposeful signature motion, interaction feedback, static fallback and reduced-motion behavior; static screenshots alone do not prove that an animation executes, so state the limit. Record a specific motionEvidence field based on source. Do not request invented people, credentials, reviews, address, product photos or proof. The required demo disclosure is legitimate. Apply reference/VISUAL-RUBRIC.md; pass only for a weighted score strictly above 9.0 with no major visual defect or misleading imagery. Treat taste-critique numerical caps as optional heuristics: do not penalize a text-led niche for fewer than four photos, or automatically fail eyebrow labels, numbering, hairlines or a three-line headline. Judge the actual rendered composition against the business brief and media truth. Be candid, specific and actionable. Return JSON matching the schema. Do not edit files, browse or use external services.`;
+}
+async function processJob(job) {
+  const dir = jobPath(job.id);
+  const site = path.join(dir, 'site');
+  const publicDir = path.join(site, 'public');
+  await mkdir(publicDir, { recursive: true });
+  const photos = job.brief.media?.photos || [];
+  const mediaDir = path.join(publicDir, 'media');
+  if (photos.length) await mkdir(mediaDir, { recursive: true });
+  const manifest = [];
+  const canonicalRoot = photos.length ? await realpath(localMediaRoot) : null;
+  for (const [index, photo] of photos.entries()) {
+    const source = await realpath(path.resolve(localMediaRoot, photo.local_path));
+    if (!source.startsWith(canonicalRoot + path.sep)) throw new Error(`Media file escapes asset root: ${photo.local_path}`);
+    const info = await stat(source);
+    if (!info.isFile() || info.size > 8_000_000) throw new Error(`Media file missing or above 8 MB: ${photo.local_path}`);
+    const output = `photo-${index + 1}${path.extname(source).toLowerCase()}`;
+    await copyFile(source, path.join(mediaDir, output));
+    manifest.push({ file: `media/${output}`, caption: photo.caption || '', provenance: photo.provenance, credit: photo.credit || null, license: photo.license || null, source_url: photo.source_url || null, source: photo.local_path, width: photo.width || null, height: photo.height || null });
+  }
+  const mediaImageArgs = manifest.slice(0, 6).flatMap(item => ['--image', path.join(publicDir, item.file)]);
+  const publicFonts = path.join(publicDir, 'fonts');
+  await mkdir(publicFonts, { recursive: true });
+  for (const name of (await readdir(fontKit)).filter(name => /\.(woff2|css|txt)$/.test(name))) {
+    await copyFile(path.join(fontKit, name), path.join(publicFonts, name));
+  }
+  await mkdir(path.join(dir, 'qa'), { recursive: true });
+  const referenceDir = path.join(site, 'reference');
+  await mkdir(referenceDir, { recursive: true });
+  await copyFile(path.join(fontKit, 'README.md'), path.join(referenceDir, 'font-library.md'));
+  await copyFile(path.join(designKit, 'QUALITY-BAR.md'), path.join(referenceDir, 'QUALITY-BAR.md'));
+  for (const name of ['nichos.md', 'direction.md', 'styles.md', 'accessibility.md', 'conversion-rules.md', 'ui-patterns.md', 'motion-opportunities.md', 'motion.md', 'motion-review.md']) {
+    await copyFile(path.join(builderRefs, name), path.join(referenceDir, name));
+  }
+  for (const [source, target] of [
+    [path.join(frontstep, 'builder', 'skills', 'frontstep-coder', 'SKILL.md'), 'frontstep-coder.md'],
+    [path.join(builderRefs, 'generated-images.md'), 'generated-images.md'],
+    [path.join(tasteSkill, 'SKILL.md'), 'taste-skill.md'],
+    [path.join(tasteSkill, 'references', 'copy.md'), 'taste-copy.md'],
+    [path.join(tasteSkill, 'references', 'imagery.md'), 'taste-imagery.md'],
+    [path.join(tasteSkill, 'references', 'critique.md'), 'taste-critique.md'],
+    [path.join(tasteSkill, 'references', 'motion.md'), 'taste-motion.md'],
+    [path.join(designKit, 'skills', 'soft-skill', 'SKILL.md'), 'high-end-visual-design.md'],
+    [path.join(designKit, 'skills', 'redesign-skill', 'SKILL.md'), 'redesign-existing-projects.md'],
+    [path.join(skillsRoot, 'frontend-design', 'SKILL.md'), 'frontend-design.md'],
+    [path.join(skillsRoot, 'react-best-practices', 'SKILL.md'), 'react-best-practices.md'],
+    [path.join(skillsRoot, 'web-design-guidelines', 'SKILL.md'), 'web-design-guidelines.md'],
+    [path.join(skillsRoot, 'minimalist-skill', 'SKILL.md'), 'minimalist-ui.md'],
+    [path.join(skillsRoot, 'ui-ux-pro-max', 'SKILL.md'), 'ui-ux-pro-max.md'],
+    [path.join(skillsRoot, 'composition-patterns', 'SKILL.md'), 'composition-patterns.md'],
+    [path.join(skillsRoot, 'gpt-tasteskill', 'SKILL.md'), 'gpt-taste.md'],
+    [path.join(skillsRoot, 'impeccable', 'reference', 'layout.md'), 'impeccable-layout.md'],
+    [path.join(skillsRoot, 'impeccable', 'reference', 'animate.md'), 'impeccable-animate.md'],
+    [path.join(skillsRoot, 'impeccable', 'reference', 'polish.md'), 'impeccable-polish.md'],
+    [path.join(skillsRoot, 'impeccable', 'reference', 'bolder.md'), 'impeccable-bolder.md']
+  ]) await copyFile(source, path.join(referenceDir, target));
+  for (const name of ['anthropic-frontend-design.md', 'vercel-web-interface-guidelines.md', 'DESIGN-WORKFLOW.md', 'BUILDER-AGENT.md', 'IMPECCABLE-ADAPTATION.md']) {
+    await copyFile(path.join(designKit, name), path.join(referenceDir, name));
+  }
+  const exemplar = await installExemplar(job.brief, referenceDir);
+  job.exemplar = exemplar ? { family: exemplar.family, slug: exemplar.slug } : null;
+  if (exemplar) {
+    for (const name of await readdir(path.join(referenceDir, 'exemplar'))) {
+      if (/\.(html|css|js)$/.test(name)) await copyFile(path.join(referenceDir, 'exemplar', name), path.join(publicDir, name));
+    }
+  }
+  job.motionSkills = await installMotionResources(designKit, site);
+  job.pipelineVersion = digest(await Promise.all(['server.mjs', 'design-resources.mjs', 'design-kit/VISUAL-RUBRIC.md'].map(file => readFile(path.join(here, file), 'utf8'))));
+  await writeFile(path.join(site, 'brief.json'), JSON.stringify(job.brief, null, 2));
+  await writeFile(path.join(referenceDir, 'media-manifest.json'), JSON.stringify(manifest, null, 2));
+  if (job.scenario) await writeFile(path.join(site, 'scenario.json'), JSON.stringify(job.scenario, null, 2));
+  job.state = 'running'; job.phase = 'design-research'; job.startedAt = new Date().toISOString(); job.error = null; job.ownerPid = process.pid;
+  await save(job);
+  try {
+    const researchFile = path.join(referenceDir, 'design-research.md');
+    await writeFile(researchFile, '# UI/UX Pro Max search candidates\n\nThese suggestions are candidates. The brief and design judgment decide what to use.\n\n');
+    const query = researchQuery(job.brief);
+    const research = await runProcess(process.env.FRONTSTEP_PYTHON || 'python',
+      [uiProSearch, query, '--design-system', ...researchDials(job.brief), '-p', job.brief.business?.name || job.brief.slug],
+      { cwd: site, stdoutFile: researchFile, stderrFile: path.join(dir, 'design-research-stderr.log'), timeoutMs: 30_000 });
+    if (!research.ok) throw new Error(`UI/UX Pro Max research unavailable: ${research.reason}`);
+    const tasteOptionsFile = path.join(referenceDir, 'taste-options.md');
+    const tasteOptions = await runProcess(process.execPath,
+      [...tasteArgs(job.brief), '--options', '3'],
+      { cwd: site, stdoutFile: tasteOptionsFile, stderrFile: path.join(dir, 'taste-stderr.log'), timeoutMs: 30_000 });
+    if (!tasteOptions.ok) throw new Error(`Taste direction options unavailable: ${tasteOptions.reason}`);
+    job.phase = 'design-plan'; await save(job);
+    const planning = await runProcess(codex,
+      ['exec', ...codexEffort, '--json', '--sandbox', 'workspace-write', '--skip-git-repo-check', '-C', site,
+        ...(exemplar ? ['--image', exemplar.desktop, '--image', exemplar.mobile] : []), ...mediaImageArgs, '-o', path.join(dir, 'design-final.txt'), '-'],
+      { cwd: site, stdin: designPrompt(job.brief) + exemplarGuidance(exemplar) + impeccableGuidance('design') + motionGuidance('design') + (manifest.length ? '\nThe remaining attached images are up to the first six current brief media in reference/media-manifest.json order. Visually inspect their actual subjects and crops before assigning them a role; provenance determines what they can claim.' : ''), stdoutFile: path.join(dir, 'design-events.jsonl'), stderrFile: path.join(dir, 'design-stderr.log'), timeoutMs: buildMs });
+    if (!planning.ok) throw new Error(`Codex design plan: ${planning.reason}`);
+    let plan;
+    const optionText = await readFile(tasteOptionsFile, 'utf8');
+    const offeredDirections = [...optionText.matchAll(/^## `([a-z0-9-]+)`/gm)].map(match => match[1]);
+    for (let planRepair = 0; planRepair <= 2; planRepair++) {
+      try {
+        plan = JSON.parse(await readFile(path.join(site, 'design-plan.json'), 'utf8'));
+        validateDesignPlan(plan, offeredDirections);
+        break;
+      } catch (error) {
+        if (planRepair === 2) throw new Error(`Design plan failed after two bounded repairs: ${error.message}`);
+        if (planRepair === 0) await copyFile(path.join(site, 'design-plan.json'), path.join(dir, 'design-plan-before-repair.json')).catch(e => { if(e.code !== 'ENOENT') throw e; });
+        job.phase = 'design-plan-repair'; job.planRepairs = planRepair + 1; await save(job);
+        const repaired = await runProcess(codex,
+          ['exec', ...codexEffort, '--json', '--sandbox', 'workspace-write', '--skip-git-repo-check', '-C', site, '-o', path.join(dir, `design-repair-final-${planRepair + 1}.txt`), '-'],
+          { cwd: site, stdin: `Repair only design-plan.json to satisfy the existing handoff contract. Read brief.json, scenario.json, reference/taste-options.md and reference/ACCEPTANCE-EVIDENCE.md. Preserve the actual art direction, facts, provenance and detailed decisions; do not replace them with generic filler. Do not write public/, run QA, install, browse, use external services or deploy. The previous plan may be missing or malformed; create valid JSON if needed. Error: ${error.message}. Required string fields (at least 12 characters): direction, alternative, why, typography, palette, hero, sectionRhythm, feature, visualMaterial, motionConcept, motionFallback. tasteDirectionId must be one of ${offeredDirections.join(', ')}. Required arrays: signatureDetails (>=3), contentClaims (>=2 claim/evidence objects), mediaInventory, missingInputs, motionStoryboard (>=3), skillApplications (>=3). motionRecipe must be a concrete STRING, not an object; retain rich original detail under motionRecipeDetails when useful. Declare renderingMode dom or webgl. DOM must not claim a positive WebGL implementation; a genuine WebGL plan still needs a complete spatialPlan with three distinct geometry/camera states. Never change the visual rubric, scenario or brief. Stop after the plan file passes this contract.`, stdoutFile: path.join(dir, `design-repair-events-${planRepair + 1}.jsonl`), stderrFile: path.join(dir, `design-repair-stderr-${planRepair + 1}.log`), timeoutMs: buildMs });
+        if (!repaired.ok) throw new Error(`Design plan repair unavailable: ${repaired.reason}`);
+      }
+    }
+    const tasteDirection = await runProcess(process.execPath,
+      [...tasteArgs(job.brief), '--direction', plan.tasteDirectionId, '--out', path.join(site, '.taste-skill')],
+      { cwd: site, stdoutFile: path.join(referenceDir, 'taste-direction.md'), stderrFile: path.join(dir, 'taste-stderr.log'), timeoutMs: 30_000 });
+    if (!tasteDirection.ok) throw new Error(`Taste direction unavailable: ${tasteDirection.reason}`);
+    let feedback = null;
+    for (let attempt = 0; attempt <= maxRepair; attempt++) {
+      job.attempt = attempt + 1; job.phase = attempt === 0 ? 'build' : 'repair'; await save(job);
+      const prompt = (attempt === 0 ? initialPrompt(job.brief, job.scenario) + exemplarGuidance(exemplar) + impeccableGuidance('build') + (manifest.length ? '\nUp to the first six current brief media are also attached after any exemplar screenshots in reference/media-manifest.json order. Use their actual visual content and crop intentionally; they remain illustrative unless provenance is business_photo.' : '') : repairPrompt(feedback?.text || '') + impeccableGuidance('repair')) + motionGuidance(attempt === 0 ? 'build' : 'repair');
+      const imageArgs = attempt > 0 && feedback?.type === 'visual'
+        ? ['desktop-hero.png', 'desktop.png', 'mobile-hero.png', 'mobile-feature.png', 'motion/storyboard.png'].filter(name => existsSync(path.join(dir, 'qa', name))).flatMap(name => ['--image', path.join(dir, 'qa', name)])
+        : attempt === 0 ? [...(exemplar ? ['--image', exemplar.desktop, '--image', exemplar.mobile] : []), ...mediaImageArgs] : [];
+      const result = await runProcess(codex,
+        ['exec', ...codexEffort, '--json', '--sandbox', 'workspace-write', '--skip-git-repo-check', '-C', site, ...imageArgs, '-o', path.join(dir, `codex-final-${attempt + 1}.txt`), '-'],
+        { cwd: site, stdin: prompt, stdoutFile: path.join(dir, `codex-events-${attempt + 1}.jsonl`), stderrFile: path.join(dir, `codex-stderr-${attempt + 1}.log`), timeoutMs: buildMs });
+      if (!result.ok) throw new Error(`Codex attempt ${attempt + 1}: ${result.reason}`);
+      try { job.skillUsage = await verifySkillUsage(site); }
+      catch (error) {
+        if (attempt === maxRepair) throw error;
+        feedback = { type: 'contract', text: error.message + '. Supply concrete skill applications referring to implemented public source, then continue to QA.' };
+        continue;
+      }
+      for (const required of ['index.html']) if (!existsSync(path.join(publicDir, required))) throw new Error(`Missing public/${required}`);
+      const files = await readdir(publicDir);
+      if (!files.some(f => f.endsWith('.css')) || !files.some(f => f.endsWith('.js'))) throw new Error('Missing CSS or JS asset');
+      if (!existsSync(qaScript)) throw new Error(`QA script unavailable: ${qaScript}`);
+      job.phase = 'qa'; await save(job);
+      await unlink(path.join(dir, 'qa', 'qa-result.json')).catch(e => { if (e.code !== 'ENOENT') throw e; });
+      const qaArgs = [qaScript, publicDir, '--brief', path.join(site, 'brief.json'), '--out', path.join(dir, 'qa'), '--json'];
+      if (job.scenario) qaArgs.push('--scenario', path.join(site, 'scenario.json'));
+      const qa = await runProcess(process.execPath, qaArgs, { cwd: site, stdoutFile: path.join(dir, `qa-stdout-${attempt + 1}.log`), stderrFile: path.join(dir, `qa-stderr-${attempt + 1}.log`), timeoutMs: qaMs });
+      let report;
+      try { report = JSON.parse(await readFile(path.join(dir, 'qa', 'qa-result.json'), 'utf8')); }
+      catch { throw new Error(`QA result missing or unreadable: ${qa.reason || 'unknown'}`); }
+      if (qa.code === 2 || !existsSync(path.join(dir, 'qa', 'qa-result.json'))) throw new Error(`QA infrastructure failed: ${qa.reason}`);
+      job.qa = report; await save(job);
+      if (!qa.ok || report.passed !== true) {
+        const failedChecks = (report.checks || []).filter(check => !check.passed);
+        if (attempt === maxRepair) throw new Error(`QA failed after ${attempt + 1} attempt(s): ${failedChecks.map(check => `${check.viewport || 'all'} ${check.code}: ${check.detail}`).join('; ').slice(0, 900)}`);
+        feedback = { type: 'qa', text: JSON.stringify({ failedChecks, passedChecks: (report.checks || []).filter(check => check.passed).map(check => `${check.viewport || 'all'} ${check.code}`) }) };
+        continue;
+      }
+      job.phase = 'motion-audit'; await save(job);
+      const motionDir = path.join(dir, 'qa', 'motion');
+      await mkdir(motionDir, { recursive: true });
+      await unlink(path.join(motionDir, 'motion-report.json')).catch(e => { if (e.code !== 'ENOENT') throw e; });
+      const motionArgs = [motionScript, publicDir, '--out', motionDir];
+      if (job.scenario) motionArgs.push('--scenario', path.join(site, 'scenario.json'));
+      const motionRun = await runProcess(process.execPath, motionArgs,
+        { cwd: site, stdoutFile: path.join(dir, `motion-stdout-${attempt + 1}.log`), stderrFile: path.join(dir, `motion-stderr-${attempt + 1}.log`), timeoutMs: motionMs });
+      let motion;
+      try { motion = JSON.parse(await readFile(path.join(motionDir, 'motion-report.json'), 'utf8')); }
+      catch { throw new Error(`Motion audit missing or unreadable: ${motionRun.reason || 'unknown'}`); }
+      if (!motionRun.ok || !motion.completed) throw new Error(`Motion audit infrastructure failed: ${motion.error || motionRun.reason}`);
+      job.motion = { totalEvents: motion.motion?.totalEvents || 0, phases: motion.motion?.phases || {}, signatureEvidence: motion.signatureEvidence || null, canvasEvidence:motion.canvasEvidence||null, reducedMotion: motion.reducedMotion?.matches === true, hiddenMeaningful: motion.reducedMotion?.hiddenMeaningful || [], mobileReducedMotion: motion.mobileReducedMotion || null, pageErrors: motion.pageErrors || [] };
+      await writeFile(path.join(referenceDir, 'motion-report.json'), JSON.stringify(job.motion, null, 2));
+      await save(job);
+      const motionProblems = [
+        ...(plan.spatialPlan&&motion.canvasEvidence?.hasRenderedChange!==true?['Spatial plan has no verified rendered canvas transformation. Mark the actual canvas data-spatial-canvas and implement the three geometric/camera states; moving HTML over a static canvas is insufficient.']:[]),
+        ...((job.scenario ? motion.notes || [] : []).map(note => `Scenario: ${note}`)),
+        ...((motion.pageErrors || []).map(error => `Page error: ${error}`)),
+        ...(motion.reducedMotion?.matches !== true ? ['Reduced-motion emulation did not match'] : []),
+        ...((motion.reducedMotion?.hiddenMeaningful || []).map(item => `Hidden under reduced motion: ${item}`)),
+        ...(motion.mobileReducedMotion?.matches !== true ? ['Mobile reduced-motion emulation did not match'] : []),
+        ...((motion.mobileReducedMotion?.hiddenMeaningful || []).map(item => `Hidden under mobile reduced motion: ${item}`)),
+        ...(motion.signatureEvidence?.hasMeaningfulChange !== true ? ['No measured signature-scene property change. Implement the planned business-specific scene, mark its container data-motion-signature and moving children data-motion-part. Hovering a button alone is insufficient. Inspect the actual report; do not add fake event counters.'] : [])
+      ];
+      if (motionProblems.length) {
+        if (attempt === maxRepair) throw new Error(`Motion audit failed after ${attempt + 1} attempt(s): ${motionProblems.join('; ').slice(0, 900)}`);
+        feedback = { type: 'motion', text: JSON.stringify({ motionProblems, audit: job.motion }) };
+        continue;
+      }
+      job.phase = 'visual-review'; await save(job);
+      const visualFile = path.join(dir, 'qa', `visual-review-${attempt + 1}.json`);
+      await unlink(visualFile).catch(e => { if (e.code !== 'ENOENT') throw e; });
+      const visual = await runProcess(codex,
+        ['exec', ...codexEffort, '--json', '--sandbox', 'read-only', '--skip-git-repo-check', '-C', site,
+          ...['desktop-hero.png', 'desktop.png', 'mobile-hero.png', 'mobile.png', 'mobile-feature.png', 'motion/storyboard.png', 'motion/interaction-storyboard.png', ...(job.scenario?.checkpoints || []).filter(state => /^[a-z0-9-]{1,40}$/.test(state.name || '')).slice(0, 6).map(state => `mobile-state-${state.name}.png`)].filter(name => existsSync(path.join(dir, 'qa', name))).flatMap(name => ['--image', path.join(dir, 'qa', name)]),
+          ...(exemplar ? ['--image', exemplar.desktop, '--image', exemplar.mobile] : []),
+          '--output-schema', path.join(designKit, 'visual-review.schema.json'), '-o', visualFile, '-'],
+        { cwd: site, stdin: visualReviewPrompt(job.brief) + motionGuidance('review') + '\nImages in order: desktop hero, desktop full page, mobile hero, mobile full page, populated mobile full page, motion storyboard (when present), then the interaction timeline and named mobile scenario checkpoints (when configured), then two family scaffold references. Inspect the checkpoint images for corrected/empty/reviewed states rather than inferring them from source. Read reference/motion-report.json as measured browser evidence. Use the seven criteria and weights in VISUAL-RUBRIC.md. Return decimal scores and criteria. Pass only for weighted total strictly above 9.0, each criterion >=8.5, and no important defect. The scaffold is a baseline, not a certified 9/10 design. It is possible and desirable to exceed it.' , stdoutFile: path.join(dir, `visual-review-events-${attempt + 1}.jsonl`), stderrFile: path.join(dir, `visual-review-stderr-${attempt + 1}.log`), timeoutMs: reviewMs });
+      if (!visual.ok) throw new Error(`Visual review unavailable: ${visual.reason}`);
+      let review;
+      try { review = JSON.parse(await readFile(visualFile, 'utf8')); }
+      catch { throw new Error('Visual review result missing or invalid JSON'); }
+      if (!Number.isFinite(review.score) || review.score < 0 || review.score > 10 || !Array.isArray(review.issues) || typeof review.passed !== 'boolean' || typeof review.motionEvidence !== 'string' || review.motionEvidence.trim().length < 20) {
+        throw new Error('Visual review result has invalid fields');
+      }
+      review = assessReview(review);
+      await atomicJson(visualFile, review);
+      const evidenceDir = path.join(dir, `evidence-${attempt + 1}`);
+      await mkdir(evidenceDir, { recursive: true });
+      for (const name of ['desktop-hero.png', 'desktop.png', 'mobile-hero.png', 'mobile.png', 'mobile-feature.png', 'mobile-feature-viewport.png', 'qa-result.json', ...Object.values(report.screenshots || {}).map(file => path.basename(file)).filter(name => /^(desktop|tablet|mobile|smallMobile)-state-[a-z0-9-]+\.png$/.test(name))]) {
+        if (existsSync(path.join(dir, 'qa', name))) await copyFile(path.join(dir, 'qa', name), path.join(evidenceDir, name));
+      }
+      await copyFile(path.join(motionDir, 'storyboard.png'), path.join(evidenceDir, 'motion-storyboard.png'));
+      if (existsSync(path.join(motionDir, 'interaction-storyboard.png'))) await copyFile(path.join(motionDir, 'interaction-storyboard.png'), path.join(evidenceDir, 'interaction-storyboard.png'));
+      await copyFile(path.join(motionDir, 'motion-report.json'), path.join(evidenceDir, 'motion-report.json'));
+      await copyFile(visualFile, path.join(evidenceDir, 'visual-review.json'));
+      job.visualHistory ||= [];
+      job.visualHistory.push({ attempt: attempt + 1, ...review });
+      job.qa = report; job.visual = review; await save(job);
+      if (review.passed === true && review.score > 9) {
+        job.publicSha256 = await publicDigest(publicDir);
+        job.state = 'succeeded'; job.phase = 'complete'; job.completedAt = new Date().toISOString(); job.ownerPid = null;
+        await save(job); return;
+      }
+      if (attempt === maxRepair) throw new Error(`Visual review failed after ${attempt + 1} attempt(s): ${review.summary || review.issues.join('; ')}`);
+      feedback = { type: 'visual', text: JSON.stringify({ current: review, previous: job.visualHistory.slice(-3, -1), instruction: 'Address current concrete issues while preserving earlier improvements. Judge the supplied populated mobile and storyboard images, not only the first screen.' }) };
+    }
+  } catch (e) {
+    job.state = 'failed'; job.phase = 'failed'; job.error = e.message; job.completedAt = new Date().toISOString(); job.ownerPid = null;
+    await save(job);
+  }
+}
+async function drain() {
+  if (busy || closing) return;
+  const next = [...jobs.values()].find(job => job.state === 'queued' && (job.ownerPid === process.pid || !liveOwner(job.ownerPid)));
+  if (!next) return;
+  busy = true;
+  try { await processJob(next); }
+  catch (error) {
+    next.state = 'failed'; next.error = `Job setup failed: ${error.message}`; next.completedAt = new Date().toISOString(); next.ownerPid = null;
+    await save(next).catch(console.error);
+  } finally { busy = false; if (!closing) setImmediate(drain); }
+}
+async function init() {
+  await mkdir(jobsDir, { recursive: true });
+  for (const id of await readdir(jobsDir)) {
+    if (!/^[0-9a-f-]{36}$/.test(id)) continue;
+    try {
+      const job = JSON.parse(await readFile(path.join(jobPath(id), 'job.json'), 'utf8'));
+      if (job.id !== id) continue;
+      if (job.state === 'running' && !liveOwner(job.ownerPid)) { job.state = 'interrupted'; job.error = 'Server stopped during run; submit a new key to retry'; job.ownerPid = null; await save(job); }
+      jobs.set(id, job);
+    } catch { /* Invalid partial job stays on disk for inspection. */ }
+  }
+}
+async function main() {
+  await init();
+  const server = createServer(async (req, res) => {
+    try {
+      const url = new URL(req.url, `http://${host}:${port}`);
+      if (req.method === 'GET' && url.pathname === '/health') return respond(res, 200, { service: 'frontstep-local', status: 'ok', pid: process.pid, queue: [...jobs.values()].filter(j => j.state === 'queued').length, running: busy, externalSystems: 'not checked' });
+      if (req.method === 'GET' && url.pathname === '/jobs') return respond(res, 200, [...jobs.values()].map(publicJob));
+      const match = url.pathname.match(/^\/jobs\/([0-9a-f-]{36})$/);
+      if (req.method === 'GET' && match) {
+        const job = jobs.get(match[1]); return job ? respond(res, 200, publicJob(job)) : respond(res, 404, { error: 'Job not found' });
+      }
+      const retry = url.pathname.match(/^\/jobs\/([0-9a-f-]{36})\/retry$/);
+      if (req.method === 'POST' && retry) {
+        const job = jobs.get(retry[1]);
+        if (!job) return respond(res, 404, { error: 'Job not found' });
+        if (!['failed', 'interrupted'].includes(job.state)) return respond(res, 409, { error: `Cannot retry ${job.state} job` });
+        if ((job.retryCount || 0) >= 2) return respond(res, 409, { error: 'Retry limit reached' });
+        job.retryCount = (job.retryCount || 0) + 1; job.state = 'queued'; job.error = null; job.completedAt = null; job.ownerPid = process.pid;
+        await save(job); setImmediate(drain); return respond(res, 202, publicJob(job));
+      }
+      if (req.method === 'POST' && url.pathname === '/jobs') {
+        const { brief, scenario, key } = validate(await bodyJson(req));
+        const prior = [...jobs.values()].find(j => j.key === key);
+        const requestHash = digest({ brief, scenario });
+        if (prior) return respond(res, prior.requestHash === requestHash ? 200 : 409, prior.requestHash === requestHash ? publicJob(prior) : { error: 'Idempotency key used for different request' });
+        const id = randomUUID();
+        const job = { id, key, requestHash, brief, scenario, state: 'queued', createdAt: new Date().toISOString(), startedAt: null, completedAt: null, attempt: 0, retryCount: 0, error: null, ownerPid: process.pid };
+        await mkdir(jobPath(id), { recursive: false }); await save(job); jobs.set(id, job);
+        setImmediate(drain); return respond(res, 202, publicJob(job));
+      }
+      const preview = url.pathname.match(/^\/preview\/([0-9a-f-]{36})(\/.*)?$/);
+      if (req.method === 'GET' && preview) {
+        const job = jobs.get(preview[1]);
+        if (!job || job.state !== 'succeeded') return respond(res, 404, { error: 'Preview unavailable' });
+        const root = path.join(jobPath(job.id), 'site', 'public');
+        const eligibility = await previewEligibility(job, root, publicDigest);
+        if (!eligibility.ok) return respond(res, 409, { error: eligibility.reason });
+        const relative = decodeURIComponent(preview[2] || '/').replace(/^\/+/, '') || 'index.html';
+        const target = path.resolve(root, relative);
+        if (!target.startsWith(root + path.sep) && target !== path.join(root, 'index.html')) return respond(res, 403, { error: 'Forbidden' });
+        const info = await stat(target).catch(() => null);
+        if (!info?.isFile()) return respond(res, 404, { error: 'Not found' });
+        const actual = await realpath(target);
+        if (!actual.startsWith(root + path.sep)) return respond(res, 403, { error: 'Forbidden' });
+        const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2' }[path.extname(target)] || 'application/octet-stream';
+        res.writeHead(200, { 'content-type': mime, 'x-content-type-options': 'nosniff' }); res.end(await readFile(target)); return;
+      }
+      respond(res, 404, { error: 'Not found' });
+    } catch (e) { respond(res, e instanceof SyntaxError || /brief|Body|scenario|Invalid|Synthetic|Missing media|Missing business|media\.photos/.test(e.message) ? 400 : 500, { error: e.message }); }
+  });
+  server.listen(port, host, () => { console.log(`Frontstep local: http://${host}:${port}`); drain(); });
+  for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => { closing = true; server.close(() => process.exit(0)); });
+}
+main().catch(e => { console.error(e); process.exitCode = 1; });

@@ -1,0 +1,13 @@
+{
+  "steps":[
+    {"action":"select","selector":"[data-testid='agendamento-aparelho']","value":"geladeira"},
+    {"action":"fill","selector":"[data-testid='agendamento-bairro']","value":"Taquaral"},
+    {"action":"select","selector":"[data-testid='agendamento-turno']","value":"tarde"}
+  ],
+  "assertions":[
+    {"kind":"visible","selector":"[data-feature='agendamento']"},
+    {"kind":"text","selector":"[data-testid='agendamento-resumo']","includes":"Geladeira"},
+    {"kind":"text","selector":"[data-testid='agendamento-resumo']","includes":"Taquaral"},
+    {"kind":"attribute","selector":"[data-testid='agendamento-whatsapp']","name":"href","includes":"wa.me/5500000000000"}
+  ]
+}

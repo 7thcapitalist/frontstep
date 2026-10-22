@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#772f24">
+  <meta name="description" content="Mesa da Praça: demonstração de cardápio e montagem de almoço em Taquaral, Campinas.">
+  <title>Mesa da Praça — almoço do seu jeito</title>
+  <link rel="preload" as="image" href="media/photo-1.jpg">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#principal">Pular para o conteúdo</a>
+  <div class="topline"><span>Uma ideia de almoço para o Taquaral</span><span>Campinas, SP</span></div>
+  <header class="site-header">
+    <a class="wordmark" href="#inicio" aria-label="Mesa da Praça, início"><span class="wordmark-emblem" aria-hidden="true">M<span>·</span>P</span><span>Mesa<br>da Praça</span></a>
+    <nav aria-label="Navegação principal"><a href="#ideia">A ideia</a><a href="#cardapio">Cardápio</a><a href="#pedido">Seu pedido</a></nav>
+    <a class="header-order" href="#cardapio">Montar almoço <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main id="principal">
+    <section id="inicio" class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <span class="hero-location">MESA DA PRAÇA <i aria-hidden="true"></i> TAQUARAL, CAMPINAS</span>
+        <h1 id="hero-title">A boa pausa<br>do dia é <em>sua.</em></h1>
+        <p>Um almoço simples para montar do seu jeito. Escolha no cardápio e veja o resumo antes de seguir.</p>
+        <a class="hero-button" href="#cardapio"><span>Explorar o cardápio</span><span class="button-orbit" aria-hidden="true">↗</span></a>
+        <div class="hero-foot"><span>Pratos de almoço · bebidas</span><span>Deslize para escolher ↓</span></div>
+      </div>
+      <figure class="hero-photo">
+        <img src="media/photo-1.jpg" width="1600" height="1067" alt="Prato de comida brasileira com arroz, salada e acompanhamento sobre mesa de madeira; imagem de referência, não é do restaurante fictício" fetchpriority="high">
+        <figcaption>Imagem de referência culinária. Não retrata pratos da Mesa da Praça.</figcaption>
+      </figure>
+      <div class="hero-accent" aria-hidden="true"><span>O</span></div>
+    </section>
+
+    <section id="ideia" class="intro section-pad" aria-labelledby="intro-title">
+      <div class="intro-index"><span class="small-star" aria-hidden="true">✳</span><span>A proposta</span></div>
+      <div class="intro-main reveal">
+        <h2 id="intro-title">Sem pressa para escolher.<br><em>Sem complicar para comer.</em></h2>
+        <p>Do prato completo ao suco, o cardápio cabe numa olhada. Toque para adicionar, ajuste as quantidades e confira os valores antes de abrir uma mensagem de demonstração.</p>
+      </div>
+      <div class="intro-stamp" aria-hidden="true"><span>UM PRATO<br>DE CADA<br>VEZ</span></div>
+    </section>
+
+    <section class="photo-story" aria-label="Fotografia de referência de comida brasileira">
+      <div class="photo-story-image reveal-image"><img src="media/photo-2.jpg" width="1600" height="1067" alt="Mesa com arroz, feijão, salada e outros pratos brasileiros; fotografia de referência, não do restaurante fictício"></div>
+      <div class="photo-story-note"><span>O almoço como ponto de encontro.</span><span>Fotografia de referência, não do restaurante fictício.</span></div>
+    </section>
+
+    <section id="cardapio" class="menu-section section-pad" aria-labelledby="menu-title">
+      <div class="menu-heading reveal"><span class="section-kicker">O que entra na mesa</span><h2 id="menu-title">Escolha o que<br><em>faz sentido hoje.</em></h2><p>Quatro opções, sem etapas escondidas. Os valores abaixo são fictícios e servem apenas para experimentar a montagem.</p></div>
+      <div class="menu-layout">
+        <div class="menu-board" data-feature="pedido">
+          <div class="menu-category"><span>Para almoçar</span><span>01 / 02</span></div>
+          <article class="menu-item reveal" data-price="38"><div class="menu-item-copy"><h3>Prato da casa</h3><p>Arroz, feijão, legumes e frango grelhado.</p></div><div class="menu-item-action"><span>R$ 38,00</span><button type="button" data-add="prato-da-casa" data-testid="adicionar-prato-da-casa" aria-label="Adicionar Prato da casa ao pedido" disabled><span aria-hidden="true">+</span></button></div></article>
+          <article class="menu-item reveal" data-price="36"><div class="menu-item-copy"><h3>Prato vegetariano</h3><p>Arroz, feijão, legumes e abóbora assada.</p></div><div class="menu-item-action"><span>R$ 36,00</span><button type="button" data-add="prato-vegetariano" data-testid="adicionar-prato-vegetariano" aria-label="Adicionar Prato vegetariano ao pedido" disabled><span aria-hidden="true">+</span></button></div></article>
+          <div class="menu-category drinks"><span>Para acompanhar</span><span>03 / 04</span></div>
+          <article class="menu-item reveal" data-price="9"><div class="menu-item-copy"><h3>Suco de laranja</h3><p>Copo de 300 ml.</p></div><div class="menu-item-action"><span>R$ 9,00</span><button type="button" data-add="suco-de-laranja" data-testid="adicionar-suco-de-laranja" aria-label="Adicionar Suco de laranja ao pedido" disabled><span aria-hidden="true">+</span></button></div></article>
+          <article class="menu-item reveal" data-price="5"><div class="menu-item-copy"><h3>Água sem gás</h3><p>Garrafa de 500 ml.</p></div><div class="menu-item-action"><span>R$ 5,00</span><button type="button" data-add="agua-sem-gas" data-testid="adicionar-agua-sem-gas" aria-label="Adicionar Água sem gás ao pedido" disabled><span aria-hidden="true">+</span></button></div></article>
+          <p class="menu-disclosure">Demonstração fictícia. Restaurante, preços e contato são exemplos; nenhum pedido será recebido.</p>
+          <p class="fallback" data-feature-fallback>Para experimentar sem JavaScript, consulte o cardápio acima. O contato e os preços são exemplos fictícios; nenhum pedido pode ser enviado aqui.</p>
+        </div>
+        <aside id="pedido" class="cart" aria-labelledby="cart-title">
+          <div class="cart-header"><span class="cart-sun" aria-hidden="true">✳</span><span>Seu lado da mesa</span></div>
+          <h2 id="cart-title">Seu pedido<span class="cart-count" data-cart-count>0</span></h2>
+          <p class="cart-subtitle">Adicione itens do cardápio para montar um resumo de exemplo.</p>
+          <div class="cart-lines" data-cart-lines aria-live="polite"><p class="cart-empty">Sua mesa está esperando a primeira escolha.</p></div>
+          <div class="cart-total"><span>Total de exemplo</span><strong data-testid="pedido-total">R$ 0,00</strong></div>
+          <a class="cart-submit is-disabled" data-testid="pedido-whatsapp" aria-disabled="true" tabindex="-1"><span>Revisar mensagem de exemplo</span><span aria-hidden="true">↗</span></a>
+          <p class="cart-legal">Demonstração fictícia. Este contato não recebe pedidos. Nada será confirmado, pago ou enviado por este site.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="visual-pair" aria-label="Imagens de referência do almoço">
+      <figure class="visual-pair-main reveal-image"><img src="media/photo-3.jpg" width="1600" height="1067" alt="Prato brasileiro com arroz, acompanhamento e frango; fotografia de referência, não de prato da Mesa da Praça"><figcaption>Uma referência para abrir o apetite. Foto ilustrativa.</figcaption></figure>
+      <figure class="visual-pair-side reveal-image"><img src="media/photo-4.jpg" width="1000" height="1500" alt="Suco de laranja sendo servido em uma garrafa; fotografia de referência, não de produto da Mesa da Praça"><figcaption>O simples também merece uma boa pausa. Foto ilustrativa.</figcaption></figure>
+    </section>
+
+    <section class="ending section-pad" aria-labelledby="ending-title"><span class="section-kicker">É só escolher</span><h2 id="ending-title">Seu almoço<br>começa <em>aqui.</em></h2><a href="#cardapio">Voltar ao cardápio <span aria-hidden="true">↗</span></a><div class="ending-disc">M<span>·</span>P</div></section>
+  </main>
+
+  <footer class="footer"><div class="footer-top"><a class="footer-logo" href="#inicio">Mesa da Praça</a><span>Taquaral · Campinas, SP</span><a href="#cardapio">Cardápio ↑</a></div><p>Demonstração fictícia. Restaurante, preços e contato são exemplos; nenhum pedido será recebido.</p><div class="photo-credits"><span>Créditos das fotografias de referência · Pexels License</span><a href="https://www.pexels.com/photo/varied-brazilian-cuisine-on-wooden-table-28992209/">pedro furtado / Pexels</a><a href="https://www.pexels.com/photo/meals-in-frying-pans-on-wooden-table-19781592/">Lucas Andrade / Pexels</a><a href="https://www.pexels.com/photo/delicious-brazilian-rice-and-bean-meal-34284708/">joao Abel / Pexels</a><a href="https://www.pexels.com/photo/fresh-orange-juice-pouring-into-glass-bottle-5946803/">Charlotte May / Pexels</a><span>Imagens ilustrativas; não mostram pratos ou instalações deste restaurante fictício.</span></div></footer>
+  <div class="mobile-cart-dock"><a href="#pedido">Ver meu pedido <span data-dock-count>0 itens</span></a></div>
+</body>
+</html>

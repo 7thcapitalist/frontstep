@@ -1,0 +1,68 @@
+{
+  "mode": "demo",
+  "language": "pt-BR",
+  "slug": "contabilidade-vila-clara",
+  "synthetic_fixture": true,
+  "business": {
+    "name": "Vila Clara Contabilidade",
+    "niche": "contabilidade para pequenos negócios",
+    "city": "Campinas",
+    "neighborhood": "Cambuí",
+    "one_liner": "Organize a rotina contábil da sua empresa com uma conversa objetiva",
+    "differentiators": ["Triagem demonstrativa em três perguntas: assunto, estágio da empresa e cidade, com resumo revisável antes da mensagem."],
+    "services": [
+      { "name": "Abertura de empresa", "price": null, "description": "Orientação inicial sobre documentos e próximos passos." },
+      { "name": "Rotina fiscal e contábil", "price": null, "description": "Conversa sobre as obrigações e a organização da operação." },
+      { "name": "Troca de contador", "price": null, "description": "Levantamento inicial para planejar a transição." }
+    ],
+    "audience": "Pessoas que vão abrir uma empresa e pequenos negócios que precisam organizar a contabilidade"
+  },
+  "contact": {
+    "whatsapp": "5500000000000",
+    "phone": null,
+    "email": null,
+    "address": null,
+    "maps_url": null,
+    "hours": null
+  },
+  "google": { "rating": null, "review_count": null, "reviews": [] },
+  "brand": {
+    "logo_url": null,
+    "colors_seen": ["#183B36", "#D9E8DE", "#F4F1E9", "#CE7049"],
+    "vibe": "calmo, claro e próximo, com leitura fácil",
+    "style_hint": "expediente visual inspirado em pastas e documentos; fotografia real de Campinas como contexto, sem simular equipe ou escritório da marca fictícia"
+  },
+  "media": {
+    "photos": [
+      {
+        "local_path": "vila-clara/campinas-real.jpg",
+        "provenance": "licensed_stock",
+        "caption": "Campinas ao entardecer. Fotografia de contexto; não mostra o escritório fictício.",
+        "source_url": "https://www.pexels.com/photo/city-in-the-evening-8199000/",
+        "license": "Pexels License",
+        "credit": "Matheus Silva / Pexels"
+      },
+      {
+        "local_path": "vila-clara/documentos-real.jpg",
+        "provenance": "licensed_stock",
+        "caption": "Materiais de trabalho fotografados para referência visual; não pertencem à empresa fictícia.",
+        "source_url": "https://www.pexels.com/photo/documents-17065743/",
+        "license": "Pexels License",
+        "credit": "Jakub Zerdzicki / Pexels"
+      }
+    ]
+  },
+  "premium_feature": {
+    "id": "triagem",
+    "description": "Triagem guiada em até três etapas: assunto (abrir empresa, trocar contador ou organizar rotina), estágio (planejando, empresa ativa ou preciso entender) e cidade. Resumo revisável antes da ação. Montar uma mensagem de WhatsApp com as escolhas, sem coletar CPF, CNPJ, nome, telefone, documentos ou dados financeiros."
+  },
+  "demo_constraints": {
+    "fictitious_notice": "Demonstração fictícia. Empresa e contato não existem; não envie dados reais.",
+    "whatsapp_behavior": "O link pode ser montado para inspeção automatizada, mas o teste local nunca deve navegar ao WhatsApp nem enviar mensagens.",
+    "no_backend": true,
+    "no_real_leads": true
+  },
+  "conversation_notes": "Brief sintético criado para testar a fábrica local. Não apresentar registro profissional, avaliações, preços, endereço, equipe ou prazo como fatos. Mostrar o aviso de demonstração junto da triagem e no rodapé.",
+  "revisions": [],
+  "domain": null
+}

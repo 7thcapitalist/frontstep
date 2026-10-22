@@ -1,0 +1,106 @@
+{
+  "steps": [
+    {
+      "action": "click",
+      "selector": "[data-testid='adicionar-prato-da-casa']"
+    },
+    {
+      "action": "click",
+      "selector": "[data-testid='adicionar-prato-da-casa']"
+    },
+    {
+      "action": "click",
+      "selector": "[data-testid='adicionar-suco-de-laranja']"
+    }
+  ],
+  "assertions": [
+    {
+      "kind": "visible",
+      "selector": "[data-feature='pedido']"
+    },
+    {
+      "kind": "text",
+      "selector": "[data-testid='pedido-total']",
+      "includes": "R$ 85,00"
+    },
+    {
+      "kind": "attribute",
+      "selector": "[data-testid='pedido-whatsapp']",
+      "name": "href",
+      "includes": "wa.me/5500000000000"
+    },
+    {
+      "kind": "attribute",
+      "selector": "[data-testid='pedido-whatsapp']",
+      "name": "href",
+      "includes": "85"
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "corrected",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "[data-minus=\"prato-da-casa\"]"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "text",
+          "selector": "[data-testid=\"pedido-total\"]",
+          "includes": "47,00"
+        }
+      ],
+      "captureSelector": "#pedido"
+    },
+    {
+      "name": "message",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "[data-testid=\"pedido-whatsapp\"]"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "text",
+          "selector": "#message-preview",
+          "includes": "47,00"
+        }
+      ],
+      "captureSelector": "#message-preview"
+    },
+    {
+      "name": "empty",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "[data-edit]"
+        },
+        {
+          "action": "click",
+          "selector": "[data-remove=\"prato-da-casa\"]"
+        },
+        {
+          "action": "click",
+          "selector": "[data-remove=\"suco-de-laranja\"]"
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "text",
+          "selector": "[data-testid=\"pedido-total\"]",
+          "includes": "0,00"
+        },
+        {
+          "kind": "attribute",
+          "selector": "[data-testid=\"pedido-whatsapp\"]",
+          "name": "aria-disabled",
+          "equals": "true"
+        }
+      ],
+      "captureSelector": "#pedido"
+    }
+  ]
+}

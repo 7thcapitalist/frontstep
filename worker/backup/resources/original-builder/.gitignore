@@ -1,0 +1,8 @@
+node_modules/
+*.bak-*
+*.log
+.env*
+gate.json
+skills.jsonl
+*.tar.gz
+__pycache__/

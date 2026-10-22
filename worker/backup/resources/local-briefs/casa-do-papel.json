@@ -1,0 +1,25 @@
+{
+  "mode":"demo", "language":"pt-BR", "slug":"casa-do-papel", "synthetic_fixture":true,
+  "business": {
+    "name":"Casa do Papel", "niche":"loja de papelaria", "city":"Campinas", "neighborhood":"Centro",
+    "one_liner":"Papelaria para quem gosta de começar no papel",
+    "services":[
+      {"name":"Caderno pontilhado", "price":24, "description":"Miolo pontilhado, valor fictício."},
+      {"name":"Bloco de notas", "price":12, "description":"Folhas lisas, valor fictício."},
+      {"name":"Caneta preta", "price":6, "description":"Traço fino, valor fictício."},
+      {"name":"Marcador de página", "price":8, "description":"Conjunto demonstrativo, valor fictício."}
+    ],
+    "audience":"Pessoas que querem explorar cadernos e acessórios simples antes de consultar a loja"
+  },
+  "contact":{"whatsapp":"5500000000000","phone":null,"email":null,"address":null,"maps_url":null,"hours":null},
+  "google":{"rating":null,"review_count":null,"reviews":[]},
+  "brand":{"logo_url":null,"colors_seen":["#243D5A","#E5B541","#F9F6ED","#D66D51"],"vibe":"lúdico, organizado e luminoso","style_hint":"grades inspiradas em cadernos e detalhes desenhados; cards tipográficos para produtos sem fotografia real"},
+  "media":{"photos":[
+    {"local_path":"loja-caderno-referencia-pexels-7792846.jpg","provenance":"licensed_stock","caption":"Referência visual de caderno, não um produto da loja fictícia.","source_url":"https://www.pexels.com/photo/black-spiral-notebook-on-white-table-7792846/","license":"Pexels License","credit":"Yan Krukau / Pexels"},
+    {"local_path":"loja-papelaria-referencia-pexels-10607157.jpg","provenance":"licensed_stock","caption":"Referência visual de papelaria, não representa o catálogo da loja fictícia.","source_url":"https://www.pexels.com/photo/woman-hands-on-table-with-colorful-notebooks-and-pens-10607157/","license":"Pexels License","credit":"cottonbro studio / Pexels"}
+  ]},
+  "premium_feature":{"id":"catalogo","description":"Filtrar por categorias Cadernos, Escrita e Acessórios, escolher produto e quantidade inteira positiva, mostrar resumo e valor total fictício em BRL. Dois Cadernos pontilhados totalizam R$ 48,00. Mensagem preparada lista item, quantidade e total, pergunta disponibilidade; não afirma estoque, entrega ou pagamento. Expor data-testid catalogo-categoria, catalogo-produto, catalogo-quantidade, catalogo-resumo e catalogo-whatsapp."},
+  "demo_constraints":{"fictitious_notice":"Demonstração fictícia. Loja, produtos, preços e contato são exemplos; nenhuma compra será recebida.","no_real_orders":true,"whatsapp_behavior":"Inspecionar href; nunca navegar ou enviar mensagem.","fallback":"Com JavaScript desligado, mostrar [data-feature-fallback] com catálogo legível e contato de demonstração."},
+  "content_notes":"As fotos licenciadas são referências visuais, não mostram produtos próprios da loja fictícia. Legendar 'referência visual'. Não inventar estoque, meios de pagamento, política de entrega ou endereço. O site é uma vitrine de consulta, sem checkout.",
+  "conversation_notes":"Fixture sintética local. Todos os valores são apenas dados de teste.","revisions":[],"domain":null
+}

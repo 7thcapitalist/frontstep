@@ -1,0 +1,11 @@
+{
+  "steps": [
+    { "action": "select", "selector": "[data-testid='agendamento-servico']", "value": "corte" },
+    { "action": "select", "selector": "[data-testid='agendamento-turno']", "value": "manha" },
+    { "action": "select", "selector": "[data-testid='agendamento-servico']", "value": "" }
+  ],
+  "assertions": [
+    { "kind": "attribute", "selector": "[data-testid='agendamento-whatsapp']", "name": "aria-disabled", "equals": "true" },
+    { "kind": "text", "selector": "[data-testid='agendamento-resumo']", "includes": "Escolha um serviço" }
+  ]
+}

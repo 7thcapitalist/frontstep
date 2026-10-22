@@ -1,0 +1,64 @@
+#!/usr/bin/env node
+// Runs synthetic fixtures against an isolated local server and exits.
+import { spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const fresh = process.argv.includes('--new');
+const requestedSlug = process.argv.find(arg => arg.startsWith('--slug='))?.slice('--slug='.length);
+const requestedSlugs = process.argv.find(arg => arg.startsWith('--slugs='))?.slice('--slugs='.length).split(',');
+const briefDir = path.join(here, '..', 'local-briefs');
+const files = await readdir(briefDir);
+const slugs = files.filter(file => file.endsWith('.scenario.json') && files.includes(file.replace('.scenario.json', '.json'))).map(file => file.replace('.scenario.json', '')).sort();
+if (requestedSlug && !slugs.includes(requestedSlug)) throw new Error(`Unknown slug: ${requestedSlug}`);
+if (requestedSlugs?.some(slug => !slugs.includes(slug))) throw new Error('Unknown slug in --slugs');
+if (requestedSlug && requestedSlugs) throw new Error('Choose --slug or --slugs');
+const port = Number(process.argv.find(arg => arg.startsWith('--port='))?.slice(7) || process.env.FRONTSTEP_LOCAL_PORT || 4189);
+if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid local port');
+const base = `http://127.0.0.1:${port}`;
+const child = spawn(process.execPath, [path.join(here, 'server.mjs')], {
+  cwd: here, env: { ...process.env, FRONTSTEP_LOCAL_PORT: String(port) }, windowsHide: true,
+  stdio: ['ignore', 'pipe', 'pipe']
+});
+child.stdout.on('data', chunk => process.stdout.write(`[server] ${chunk}`));
+child.stderr.on('data', chunk => process.stderr.write(`[server] ${chunk}`));
+const stop = () => child.kill('SIGTERM');
+process.on('SIGINT', stop);
+async function ready() {
+  for (let i = 0; i < 150; i++) {
+    if (child.exitCode !== null) throw new Error(`Server exited ${child.exitCode}`);
+    let response;
+    try { response = await fetch(`${base}/health`); } catch { /* starting */ }
+    if (response?.ok) {
+      const health = await response.json();
+      if (health.service !== 'frontstep-local' || health.pid !== child.pid) throw new Error(`Port ${port} belongs to another process; no job was submitted`);
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+  throw new Error('Local server did not become ready');
+}
+try {
+  await ready();
+  for (const slug of (requestedSlug ? [requestedSlug] : requestedSlugs || slugs)) {
+    const brief = JSON.parse(await readFile(path.join(briefDir, `${slug}.json`), 'utf8'));
+    const scenario = JSON.parse(await readFile(path.join(briefDir, `${slug}.scenario.json`), 'utf8'));
+    const submit = await fetch(`${base}/jobs`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ brief, scenario, ...(fresh ? { idempotencyKey: `design-${randomUUID()}` } : {}) }) });
+    if (!submit.ok) throw new Error(`Submit ${slug}: ${submit.status} ${await submit.text()}`);
+    let job = await submit.json();
+    console.log(`[${slug}] ${job.id}: ${job.state}`);
+    while (!['succeeded', 'failed', 'interrupted'].includes(job.state)) {
+      await new Promise(resolve => setTimeout(resolve, 10_000));
+      const res = await fetch(`${base}/jobs/${job.id}`);
+      if (!res.ok) throw new Error(`Status: ${res.status}`);
+      job = await res.json();
+      console.log(`[${slug}] ${job.id}: ${job.state}/${job.phase || 'queued'} (attempt ${job.attempt})`);
+    }
+    console.log(JSON.stringify({ slug, id: job.id, state: job.state, error: job.error, preview: job.previewUrl, qaPassed: job.qa?.passed, visualScore: job.visual?.score, criteria: job.visual?.criteria, signatureMotion: job.motion?.signatureEvidence?.hasMeaningfulChange, pipelineVersion: job.pipelineVersion, publicSha256: job.publicSha256 }, null, 2));
+    if (job.state !== 'succeeded') process.exitCode = 1;
+  }
+} catch (error) { console.error(error); process.exitCode = 1; }
+finally { stop(); }
