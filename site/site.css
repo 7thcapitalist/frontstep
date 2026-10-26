@@ -229,7 +229,7 @@ a.dev:hover .dev-desk{transform:translateY(-6px) scale(1.01)}a.dev:hover .dev-ph
 .scrub .m{position:absolute;inset:0}
 .scrub .m::after{display:none}
 .scrub-video{position:absolute;inset:-2%;width:104%;height:104%;object-fit:cover;opacity:0;transition:opacity .6s var(--ease)}
-.scrub-stage.film-on .scrub-video{opacity:1}
+.scrub-stage.film-on.moving .scrub-video{opacity:1}
 .scrub .hero-in{z-index:3}
 .chap{position:absolute;inset:auto 0 0;z-index:3;padding-bottom:clamp(40px,7vh,90px);opacity:0;visibility:hidden;will-change:transform,opacity}
 .chap .kick{color:rgba(239,234,224,.8);margin:0 0 18px}
@@ -297,8 +297,16 @@ a.dev:hover .dev-desk{transform:translateY(-6px) scale(1.01)}a.dev:hover .dev-ph
 }
 
 
-/* o h1 do hero é o LCP: fica estático e pinta no primeiro frame, sem esperar JS nem animação (WEB-260).
-   Só os itens menores entram com fade. */
-@keyframes fade-up{from{opacity:0;transform:translateY(24px)}}
-.hero-meta>*,.wk-hero .kick,.wk-sub{animation:fade-up 1s cubic-bezier(.22,1,.36,1) .3s backwards}
-@media(prefers-reduced-motion:reduce){.hero-meta>*,.wk-hero .kick,.wk-sub{animation:none}}
+/* h1 do hero: sobe e aparece por CSS, no primeiro frame, sem esperar JS (LCP, WEB-260).
+   O texto já ocupa a área final com opacidade .01, então o LCP conta no primeiro paint. Mesma curva e tempo da versão GSAP. */
+.hero h1 .ln,.wk-hero h1 .ln{overflow:visible}
+@keyframes ln-up{from{opacity:.01;transform:translateY(.45em)}}
+@keyframes fade-up{from{opacity:.01;transform:translateY(24px)}}
+.hero h1 .ln>span,.wk-hero h1 .ln>span{animation:ln-up 1.1s cubic-bezier(.16,1,.3,1) .05s backwards}
+.hero h1 .ln:nth-child(2)>span,.wk-hero h1 .ln:nth-child(2)>span{animation-delay:.13s}
+.hero-meta>*,.wk-hero .kick,.wk-sub{animation:fade-up 1s cubic-bezier(.215,.61,.355,1) .15s backwards}
+.hero-meta>:nth-child(2){animation-delay:.2s}.hero-meta>:nth-child(3){animation-delay:.25s}.hero-meta>:nth-child(4){animation-delay:.3s}
+@media(prefers-reduced-motion:reduce){.hero h1 .ln>span,.wk-hero h1 .ln>span,.hero-meta>*,.wk-hero .kick,.wk-sub{animation:none}}
+
+/* recorte de celular do hero (hero-m.webp) já vem centrado no mesmo ponto do vídeo */
+@media(max-width:480px){.hero.scrub .m img{object-position:50% 50%}}

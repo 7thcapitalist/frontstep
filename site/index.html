@@ -10,7 +10,8 @@
 <meta property="og:description" content="O primeiro passo do seu cliente.">
 <meta property="og:image" content="/img/hero-film.webp">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%232E5BFF'/%3E%3Cpath d='M132 380V300H212V220H292V140H380V380Z' fill='white'/%3E%3C/svg%3E">
-<link rel="preload" as="image" href="/img/hero-film.webp" fetchpriority="high">
+<link rel="preload" as="image" href="/img/hero-m.webp" media="(max-width:480px)" fetchpriority="high">
+<link rel="preload" as="image" href="/img/hero.webp" media="(min-width:481px)" fetchpriority="high">
 <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/onest-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">
@@ -24,7 +25,7 @@
 <main>
 <section class="hero scrub" aria-label="Frontstep">
   <div class="scrub-stage">
-    <div class="m"><img src="/img/hero-film.webp" alt="Escada azul gigante numa planície de sal ao pôr do sol, com uma pessoa pequena diante dela" fetchpriority="high"></div>
+    <div class="m"><picture><source media="(max-width:480px)" srcset="/img/hero-m.webp"><img src="/img/hero.webp" alt="Escada azul gigante numa planície de sal ao pôr do sol, com uma pessoa pequena diante dela" fetchpriority="high"></picture></div>
     <video class="scrub-video" muted playsinline preload="none" aria-hidden="true" data-desktop="/media/hero-film.mp4" data-mobile="/media/hero-film-m.mp4"></video>
     <div class="hero-shade" aria-hidden="true"></div>
     <div class="hero-in wrap" data-from="0" data-to="0.24">
