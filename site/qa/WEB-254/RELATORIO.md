@@ -11,7 +11,7 @@
 - `m390-nav.png`: primeira dobra a 390 px, com barra opaca e nav legível.
 - `m390-cta-sem-sobreposicao.png`: CTA final a 390 px sem o flutuante sobre o texto.
 - `d1280-cta-hover.png`: estado de hover do CTA em desktop.
-- `node --test site/tests/*.test.mjs`: 9 testes, 9 passaram, 0 falhas.
+- `node --test site/tests/*.test.mjs`: 7 testes, 7 passaram, 0 falhas.
 
 ## Limites
 
