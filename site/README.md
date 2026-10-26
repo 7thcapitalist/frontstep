@@ -1,5 +1,12 @@
-# site
+# Site da Frontstep
 
-Codigo do site da Frontstep (projeto Vercel "frontstep", conta 7thcapitalist).
+Código estático do projeto Vercel `frontstep`, conta `7thcapitalist`.
 
-Ainda vazio. Quando o codigo estiver aqui, ligue o projeto da Vercel a este repo (Settings > Git, pasta raiz `site`) e cada push faz o deploy sozinho.
+- `index.html`: landing principal.
+- `trabalhos/index.html`: detalhes dos cinco sites de demonstração.
+- `site.css` e `build/main.js`: estilos e interações da landing.
+- `img/` e `media/`: imagens e vídeos publicados.
+
+Os exemplos da vitrine são negócios fictícios e devem continuar identificados assim. Os links apontam para demos navegáveis da Frontstep; não descreva os exemplos como clientes reais.
+
+Para testar localmente, sirva esta pasta na raiz do servidor HTTP (as URLs de assets começam com `/`).
