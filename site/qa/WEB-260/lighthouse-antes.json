@@ -1,0 +1,106 @@
+{
+  "producao-mobile": {
+    "performance": 92,
+    "lcpMs": 3157,
+    "transferBytes": 1113355,
+    "cls": 0,
+    "runs": [
+      {
+        "performance": 89,
+        "lcpMs": 3239,
+        "transferBytes": 1113346,
+        "cls": 0.001
+      },
+      {
+        "performance": 92,
+        "lcpMs": 3157,
+        "transferBytes": 1113386,
+        "cls": 0
+      },
+      {
+        "performance": 92,
+        "lcpMs": 3136,
+        "transferBytes": 1113355,
+        "cls": 0
+      }
+    ]
+  },
+  "preview-mobile": {
+    "performance": 83,
+    "lcpMs": 3795,
+    "transferBytes": 1336776,
+    "cls": 0.001,
+    "runs": [
+      {
+        "performance": 86,
+        "lcpMs": 3960,
+        "transferBytes": 1336776,
+        "cls": 0.008
+      },
+      {
+        "performance": 82,
+        "lcpMs": 3795,
+        "transferBytes": 1336776,
+        "cls": 0.001
+      },
+      {
+        "performance": 83,
+        "lcpMs": 3380,
+        "transferBytes": 1201271,
+        "cls": 0
+      }
+    ]
+  },
+  "producao-desktop": {
+    "performance": 99,
+    "lcpMs": 874,
+    "transferBytes": 1722402,
+    "cls": 0.004,
+    "runs": [
+      {
+        "performance": 99,
+        "lcpMs": 888,
+        "transferBytes": 1722428,
+        "cls": 0.004
+      },
+      {
+        "performance": 99,
+        "lcpMs": 847,
+        "transferBytes": 1722390,
+        "cls": 0.004
+      },
+      {
+        "performance": 99,
+        "lcpMs": 874,
+        "transferBytes": 1722402,
+        "cls": 0.022
+      }
+    ]
+  },
+  "preview-desktop": {
+    "performance": 98,
+    "lcpMs": 984,
+    "transferBytes": 1945495,
+    "cls": 0.028,
+    "runs": [
+      {
+        "performance": 98,
+        "lcpMs": 1067,
+        "transferBytes": 1945495,
+        "cls": 0.028
+      },
+      {
+        "performance": 98,
+        "lcpMs": 984,
+        "transferBytes": 1945495,
+        "cls": 0.035
+      },
+      {
+        "performance": 99,
+        "lcpMs": 960,
+        "transferBytes": 1945507,
+        "cls": 0.001
+      }
+    ]
+  }
+}

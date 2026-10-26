@@ -35,22 +35,27 @@ function lighthouse(url, name, desktop) {
   });
 }
 
+const RUNS = Number(process.env.LIGHTHOUSE_RUNS || 3);
+const cases = [["producao-mobile", productionOrigin, false], ["preview-mobile", "http://127.0.0.1:43159", false], ["producao-desktop", productionOrigin, true], ["preview-desktop", "http://127.0.0.1:43159", true]];
 try {
-  await lighthouse(productionOrigin, "producao-mobile", false);
-  await lighthouse("http://127.0.0.1:43159", "preview-mobile", false);
-  await lighthouse(productionOrigin, "producao-desktop", true);
-  await lighthouse("http://127.0.0.1:43159", "preview-desktop", true);
+  for (let i = 1; i <= RUNS; i++) for (const [name, url, desktop] of cases) await lighthouse(url, `${name}-${i}`, desktop);
 } finally { await new Promise(resolve => server.close(resolve)); }
 
+const median = values => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
 const summary = {};
-for (const name of ["producao-mobile", "preview-mobile", "producao-desktop", "preview-desktop"]) {
-  const report = JSON.parse(await readFile(`${outDir}/${name}.json`, "utf8"));
-  summary[name] = {
-    performance: Math.round(report.categories.performance.score * 100),
-    lcpMs: Math.round(report.audits["largest-contentful-paint"].numericValue),
-    transferBytes: Math.round(report.audits["total-byte-weight"].numericValue),
-    cls: Number(report.audits["cumulative-layout-shift"].numericValue.toFixed(3)),
-  };
+for (const [name] of cases) {
+  const runs = [];
+  for (let i = 1; i <= RUNS; i++) {
+    const report = JSON.parse(await readFile(`${outDir}/${name}-${i}.json`, "utf8"));
+    runs.push({
+      performance: Math.round(report.categories.performance.score * 100),
+      lcpMs: Math.round(report.audits["largest-contentful-paint"].numericValue),
+      transferBytes: Math.round(report.audits["total-byte-weight"].numericValue),
+      cls: Number(report.audits["cumulative-layout-shift"].numericValue.toFixed(3)),
+    });
+  }
+  // mediana por métrica; `runs` guarda as rodadas para auditoria
+  summary[name] = { performance: median(runs.map(r => r.performance)), lcpMs: median(runs.map(r => r.lcpMs)), transferBytes: median(runs.map(r => r.transferBytes)), cls: median(runs.map(r => r.cls)), runs };
 }
 await writeFile(`${outDir}/summary.json`, JSON.stringify(summary, null, 2) + "\n");
 console.log(JSON.stringify(summary));

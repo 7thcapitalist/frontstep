@@ -1,3 +1,5 @@
+@font-face{font-family:"Archivo";font-style:normal;font-weight:400 800;font-stretch:62% 125%;font-display:swap;src:url(/fonts/archivo-latin.woff2) format("woff2")}
+@font-face{font-family:"Onest";font-style:normal;font-weight:400 500;font-display:swap;src:url(/fonts/onest-latin.woff2) format("woff2")}
 :root{--ink:#0B0C10;--ink2:#14161D;--cream:#EFEAE0;--dim:#8C887F;--line:rgba(239,234,224,.16);--blue:#2E5BFF;
   --display:"Archivo",system-ui,sans-serif;--body:"Onest",system-ui,sans-serif;
   --gx:max(4vw,16px);--ease:cubic-bezier(.2,.7,.1,1)}
@@ -293,3 +295,10 @@ a.dev:hover .dev-desk{transform:translateY(-6px) scale(1.01)}a.dev:hover .dev-ph
   .track .m{height:100%;width:auto}
   .track .m:nth-child(even){height:84%;margin-top:0;align-self:flex-end}
 }
+
+
+/* o h1 do hero é o LCP: fica estático e pinta no primeiro frame, sem esperar JS nem animação (WEB-260).
+   Só os itens menores entram com fade. */
+@keyframes fade-up{from{opacity:0;transform:translateY(24px)}}
+.hero-meta>*,.wk-hero .kick,.wk-sub{animation:fade-up 1s cubic-bezier(.22,1,.36,1) .3s backwards}
+@media(prefers-reduced-motion:reduce){.hero-meta>*,.wk-hero .kick,.wk-sub{animation:none}}
