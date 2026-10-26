@@ -7,6 +7,7 @@ import test from 'node:test';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const home = readFileSync(join(root, 'index.html'), 'utf8');
 const work = readFileSync(join(root, 'trabalhos', 'index.html'), 'utf8');
+const styles = readFileSync(join(root, 'site.css'), 'utf8');
 
 const demoUrls = [
   'https://fs-demo-floricultura.vercel.app',
@@ -56,4 +57,10 @@ test('assets locais referenciados existem', () => {
   for (const reference of references) {
     assert.ok(existsSync(join(root, reference)), `asset ausente: ${reference}`);
   }
+});
+
+test('o hero fixado termina em 150svh e a cena seguinte não abre vazia', () => {
+  assert.match(styles, /\.scrub\{height:150svh;/);
+  assert.doesNotMatch(styles, /\.scrub\{height:(?:4[0-9]{2}|[5-9][0-9]{2})svh;/);
+  assert.match(styles, /\.mani \.m\{position:absolute;inset:0;clip-path:none!important\}/);
 });
