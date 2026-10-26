@@ -18,10 +18,13 @@ test('poster do hero eager com preload, fontes locais, JS e imagens só depois d
   assert.match(css, /@font-face\{font-family:"Archivo"[^}]*font-display:swap/);
   assert.match(bundle, /\["wheel","touchstart","keydown","pointerdown","scroll"\]/);
   assert.doesNotMatch(bundle, /document\.readyState==="complete"\?\w+\(\):addEventListener\("load"/);
-  // o h1 sobe por CSS no primeiro frame (sem GSAP) e o vídeo carrega 2,5 s após o load, ou na 1ª interação
+  // o h1 sobe por CSS no primeiro frame (sem GSAP) e o vídeo só carrega na 1ª interação do visitante
   assert.doesNotMatch(bundle, /A\.from\("\.hero h1 \.ln>span/);
   assert.match(css, /@keyframes ln-up/);
-  assert.match(bundle, /setTimeout\(y,2500\)/);
+  assert.doesNotMatch(bundle, /setTimeout\(y,/);
+  // o gatilho do vídeo (y) não pode ser disparado por load, timer ou readyState
+  assert.doesNotMatch(bundle, /readyState==="complete"\?Promise\.resolve\(\)/);
+  assert.doesNotMatch(bundle, /\.then\(\(\)=>setTimeout\(y\b/);
   assert.match(bundle, /classList.toggle\("moving"/);
 });
 
