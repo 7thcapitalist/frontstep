@@ -1,0 +1,106 @@
+{
+  "producao-mobile": {
+    "performance": 88,
+    "lcpMs": 3149,
+    "transferBytes": 1113362,
+    "cls": 0.006,
+    "runs": [
+      {
+        "performance": 88,
+        "lcpMs": 3149,
+        "transferBytes": 1113362,
+        "cls": 0.001
+      },
+      {
+        "performance": 87,
+        "lcpMs": 3130,
+        "transferBytes": 1113352,
+        "cls": 0.006
+      },
+      {
+        "performance": 92,
+        "lcpMs": 3164,
+        "transferBytes": 1113363,
+        "cls": 0.008
+      }
+    ]
+  },
+  "preview-mobile": {
+    "performance": 97,
+    "lcpMs": 2062,
+    "transferBytes": 573298,
+    "cls": 0,
+    "runs": [
+      {
+        "performance": 98,
+        "lcpMs": 2236,
+        "transferBytes": 573269,
+        "cls": 0
+      },
+      {
+        "performance": 97,
+        "lcpMs": 2062,
+        "transferBytes": 573298,
+        "cls": 0
+      },
+      {
+        "performance": 96,
+        "lcpMs": 2049,
+        "transferBytes": 573312,
+        "cls": 0
+      }
+    ]
+  },
+  "producao-desktop": {
+    "performance": 99,
+    "lcpMs": 850,
+    "transferBytes": 1722437,
+    "cls": 0.001,
+    "runs": [
+      {
+        "performance": 99,
+        "lcpMs": 852,
+        "transferBytes": 1722448,
+        "cls": 0.001
+      },
+      {
+        "performance": 99,
+        "lcpMs": 843,
+        "transferBytes": 1722409,
+        "cls": 0.004
+      },
+      {
+        "performance": 99,
+        "lcpMs": 850,
+        "transferBytes": 1722437,
+        "cls": 0.001
+      }
+    ]
+  },
+  "preview-desktop": {
+    "performance": 100,
+    "lcpMs": 572,
+    "transferBytes": 573283,
+    "cls": 0,
+    "runs": [
+      {
+        "performance": 100,
+        "lcpMs": 572,
+        "transferBytes": 573298,
+        "cls": 0
+      },
+      {
+        "performance": 100,
+        "lcpMs": 553,
+        "transferBytes": 573269,
+        "cls": 0
+      },
+      {
+        "performance": 100,
+        "lcpMs": 584,
+        "transferBytes": 573283,
+        "cls": 0
+      }
+    ]
+  }
+}
