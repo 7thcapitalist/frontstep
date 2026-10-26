@@ -49,7 +49,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 
 /* manifesto: full-bleed clip, text lines swap with the scroll */
 .mani{position:relative;height:100svh;min-height:560px;overflow:hidden}
-.mani .m{position:absolute;inset:0}
+.mani .m{position:absolute;inset:0;clip-path:none!important}
 .mani .m::after{content:"";position:absolute;inset:0;background:rgba(11,12,16,.28)}
 .mani-in{position:absolute;inset:0;display:grid;place-items:center;text-align:center;z-index:2}
 .mani-in p{font-size:clamp(48px,10vw,200px);display:grid}
@@ -211,8 +211,8 @@ a.dev:hover .dev-desk{transform:translateY(-6px) scale(1.01)}a.dev:hover .dev-ph
 .wk-hero h1 .ln{display:block;overflow:hidden;padding-bottom:.04em}.wk-hero h1 .ln>span{display:block}
 .wk-sub{margin:clamp(24px,3vw,40px) 0 0;max-width:46ch;color:rgba(239,234,224,.82);font-size:clamp(16px,1.3vw,19px)}
 
-/* scroll-scrubbed film hero: tall track, sticky stage, chapters read over the film */
-.scrub{height:620svh;min-height:0;overflow:visible}
+/* scroll-scrubbed film hero: one short beat before the page content */
+.scrub{height:150svh;min-height:0;overflow:visible}
 .scrub-stage{position:sticky;top:0;height:100svh;min-height:560px;overflow:hidden;background:var(--ink)}
 .scrub .m{position:absolute;inset:0}
 .scrub .m::after{display:none}
@@ -225,7 +225,7 @@ a.dev:hover .dev-desk{transform:translateY(-6px) scale(1.01)}a.dev:hover .dev-ph
 .chap .pill{margin-top:clamp(22px,3vw,36px)}
 .scrub-bar{position:absolute;left:max(var(--gx),env(safe-area-inset-left));right:max(var(--gx),env(safe-area-inset-right));bottom:14px;height:2px;background:rgba(239,234,224,.16);z-index:3}
 .scrub-bar b{position:absolute;inset:0;background:var(--blue);transform-origin:left;transform:scaleX(0)}
-@media(max-width:760px){.scrub{height:480svh}.scrub .m img,.scrub-video{object-position:60% 50%}}
+@media(max-width:760px){.scrub .m img,.scrub-video{object-position:60% 50%}}
 @media(prefers-reduced-motion:reduce){.scrub{height:auto}.scrub-stage{position:relative;height:100svh}.chap{display:none}}
 
 /* case backdrops: stills with the blue step, drifting slowly (free motion, no clip) */
