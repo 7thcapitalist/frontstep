@@ -1,0 +1,54 @@
+{
+  "slots": {
+    "demo-advocacia-phone": {
+      "desktop": "/media/demo-advocacia-phone.mp4",
+      "desktop_kb": 305,
+      "source": "recording"
+    },
+    "demo-advocacia-desk": {
+      "desktop": "/media/demo-advocacia-desk.mp4",
+      "desktop_kb": 602,
+      "source": "recording"
+    },
+    "demo-contabilidade-phone": {
+      "desktop": "/media/demo-contabilidade-phone.mp4",
+      "desktop_kb": 358,
+      "source": "recording"
+    },
+    "demo-contabilidade-desk": {
+      "desktop": "/media/demo-contabilidade-desk.mp4",
+      "desktop_kb": 866,
+      "source": "recording"
+    },
+    "demo-floricultura-phone": {
+      "desktop": "/media/demo-floricultura-phone.mp4",
+      "desktop_kb": 284,
+      "source": "recording"
+    },
+    "demo-floricultura-desk": {
+      "desktop": "/media/demo-floricultura-desk.mp4",
+      "desktop_kb": 494,
+      "source": "recording"
+    },
+    "demo-festa-phone": {
+      "desktop": "/media/demo-festa-phone.mp4",
+      "desktop_kb": 194,
+      "source": "recording"
+    },
+    "demo-festa-desk": {
+      "desktop": "/media/demo-festa-desk.mp4",
+      "desktop_kb": 327,
+      "source": "recording"
+    },
+    "demo-loja-phone": {
+      "desktop": "/media/demo-loja-phone.mp4",
+      "desktop_kb": 165,
+      "source": "recording"
+    },
+    "demo-loja-desk": {
+      "desktop": "/media/demo-loja-desk.mp4",
+      "desktop_kb": 395,
+      "source": "recording"
+    }
+  }
+}

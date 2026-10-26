@@ -1,0 +1,36 @@
+{
+  "m390": {
+    "viewportHeight": 844,
+    "heroHeight": 1266,
+    "heroVh": 150,
+    "firstContentTop": 1266,
+    "firstContentVh": 150,
+    "afterOneScroll": {
+      "scrollY": 844,
+      "bandTop": 422,
+      "bandBottom": 498,
+      "bandVisible": true
+    },
+    "manifesto": {
+      "clipPath": "none",
+      "renderedWidth": 390,
+      "viewportWidth": 390,
+      "imageComplete": true,
+      "naturalWidth": 1122
+    }
+  },
+  "d1280": {
+    "viewportHeight": 720,
+    "heroHeight": 1080,
+    "heroVh": 150,
+    "firstContentTop": 1080,
+    "firstContentVh": 150,
+    "afterOneScroll": {
+      "scrollY": 720,
+      "bandTop": 360,
+      "bandBottom": 505,
+      "bandVisible": true
+    },
+    "manifesto": null
+  }
+}
