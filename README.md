@@ -11,7 +11,7 @@ Fábrica de sites para pequenos negócios: acha o lead no Google Maps, oferece u
 | `n8n/workflows/` | Export dos workflows Frontstep e Holding, sem segredos |
 | `site/` | Site da Frontstep |
 | `docs/` | Status, marca, holding, n8n + Kapso |
-| `scripts/` | `pull-from-minipc.ps1` (traz o worker e os assets) e `export-n8n.mjs` (backup do n8n) |
+| `scripts/` | Sincronização, backup do n8n e preview auditável da vitrine (`deploy-vitrine.mjs`) |
 
 ## Fluxo
 
@@ -48,6 +48,15 @@ N8N_API_KEY=... node scripts/export-n8n.mjs
 ```
 cd ~/frontstep && git pull && sudo bash worker/update.sh
 ```
+
+**Gerar preview e cartão de publicação da vitrine** (depois que um PR entrar na `main`):
+```
+node scripts/deploy-vitrine.mjs
+```
+O script passa pelo guard de orçamento, publica apenas em Preview, verifica HTTP/console,
+roda Lighthouse mobile e desktop, anexa os comparativos ao Paperclip e abre o cartão
+“Publicar a vitrine nova?”. Ele registra sucesso ou falha em `ledger/runs.jsonl` e nunca
+promove para produção sozinho.
 
 ## Regras que valem para tudo
 

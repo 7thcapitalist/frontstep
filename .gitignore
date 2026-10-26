@@ -20,6 +20,8 @@ uploads/
 
 # copia local da skill do mini PC para comparacao
 .minipc/
+.vercel/
+site/qa/deploy-vitrine/
 
 # sistema
 .DS_Store
