@@ -1,65 +1,78 @@
 # Frontstep
 
-Fábrica de sites para pequenos negócios: acha o lead no Google Maps, oferece uma prévia pelo WhatsApp, monta o site com Claude Code no mini PC, negocia, cobra e entrega. Repositório privado.
+**Websites for small businesses that don't have one, found, built and sold almost entirely by software.**
 
-## Pastas
+Frontstep finds local businesses in Brazil that have good reviews on Google Maps but no website, builds a custom preview site with an AI coding agent, sends it to the owner on WhatsApp, and handles the price negotiation and payment link. A human (João) approves the lead list and steps in for anything the bot can't close.
 
-| Pasta | O que tem |
+- **Live site:** https://frontstep-phi.vercel.app
+- **Who it's for:** owners of small Brazilian businesses (clinics, shops, event planners, lawyers, accountants) who are on WhatsApp and Instagram but have no site.
+- **Status:** working prototype, early. The pipeline runs end to end, but there is no meaningful revenue yet. The five showcase sites on the landing page are fictional businesses, labeled as such. The first real customer site was built for a friendly customer with a 100% discount coupon. No funding.
+
+## How it works
+
+```
+Capture    Google Maps scrape (Apify) -> CRM sheet (rating, reviews, phone, photos)
+Outreach   WhatsApp template (Kapso) -> reply classifier: yes / no / opt-out / question
+Build      "yes" -> brief -> POST /build to a worker -> Claude Code (headless)
+           with the frontstep-coder skill -> QA gate -> Vercel deploy
+Preview    preview link sent on WhatsApp (08:00-20:00 BRT window only)
+Sales      negotiation bot (price floors enforced in code), domain check, Mercado Pago link
+After      payment webhook -> mark paid -> confirm to the customer
+Holding    ledger of costs and revenue per "factory", pricing A/B test, weekly report
+```
+
+Design choices worth knowing:
+
+- **Rules live in code, not in the prompt.** The sales bot's price floors are enforced by a code step that scans every R$ value in the model's reply. The reply classifier and decision ledger are plain, tested JS.
+- **QA gate.** `coder-skill/scripts/qa-gate.mjs` checks generated sites (photos, colour, brand, overflow) before anything is shown to a customer.
+- **Push, not poll.** After an incident where polling burned the n8n execution quota in hours, the worker only receives pushes.
+- **Messaging guardrails.** Customer messages only go out 08:00-20:00 BRT; outside that window they are scheduled, never dropped. Opt-outs are honored.
+
+## Repo layout
+
+| Path | What's in it |
 |---|---|
-| `coder-skill/` | A skill `frontstep-coder`: regras do builder, referências e o QA gate (`scripts/qa-gate.mjs`) |
-| `worker/` | Servidor do mini PC (POST /build, Claude Code headless, gate, deploy na Vercel) |
-| `n8n/workflows/` | Export dos workflows Frontstep e Holding, sem segredos |
-| `site/` | Site da Frontstep |
-| `docs/` | Status, marca, holding, n8n + Kapso |
-| `scripts/` | Sincronização, backup do n8n e preview auditável da vitrine (`deploy-vitrine.mjs`) |
+| `coder-skill/` | The `frontstep-coder` skill: builder rules, style/motion/conversion references, the QA gate |
+| `n8n/` | Exported n8n workflows (secrets masked) plus tested Code-node logic: reply classifier (`wf2-classificador/`), decision ledger (`wf2-decision-ledger/`), webhook signature check |
+| `worker/` | Build-server notes. `worker/backup/` is a local fallback executor (SQLite job ledger, durable queue, budget caps, browser QA) |
+| `site/` | The static landing page deployed on Vercel, plus per-change QA reports |
+| `scripts/` | n8n export, mini-PC sync, and `deploy-vitrine.mjs` (preview deploy with Lighthouse and browser checks; never promotes to production by itself) |
+| `docs/` | Status notes, brand, pricing/holding design, n8n + Kapso setup |
 
-## Fluxo
+## Running it
+
+This is a personal operations stack, not a one-command install. It depends on accounts for n8n, Kapso (WhatsApp), Apify, Vercel, Mercado Pago and Claude Code, plus a small always-on machine for the build worker.
+
+1. Copy `.env.example` to the worker's env file and fill in the values (names only are in the repo; real tokens never are).
+2. Import the workflows from `n8n/` into n8n.
+3. Run the worker on the build machine (see `docs/` and `worker/`).
+
+Checks you can run without any accounts:
 
 ```
-0 Captura (Apify/Maps) -> planilha CRM
-1 Outreach (template Kapso) -> 2 Respostas (classifica sim/não)
-sim -> 3 Montar brief -> POST /build no mini PC -> Claude Code + frontstep-coder -> QA gate -> Vercel
-    -> 5 Site pronto (manda a prévia, janela 08-20 BRT)
-6 Bot de vendas (preço, piso, domínio, link Mercado Pago) -> 7 Pagamento confirmado -> 8 Pós-venda
-Holding: ledger de custos e receita, teste de preço, relatório semanal
+node --test n8n/wf2-classificador/classificador.test.mjs \n  n8n/wf2-decision-ledger/decision-ledger.test.mjs \n  n8n/patches/webhook-lead-secret/test.mjs
 ```
 
-## Segredos ficam fora do repo
-
-Tokens moram só em `/etc/frontstep-worker.env` no mini PC e nas credenciais do n8n. `.env.example` lista os nomes. Antes de commitar algo novo:
+Before committing, scan for secrets:
 
 ```
 git grep -nE "sk-ant|APP_USR|ghp_|Bearer [A-Za-z0-9]{20}"
 ```
 
-## Tarefas comuns
+## Stack
 
-**Trazer o que está no mini PC** (no Windows, na pasta do repo):
-```
-powershell -ExecutionPolicy Bypass -File scripts\pull-from-minipc.ps1
-```
+Claude Code (headless) as the site builder, n8n for orchestration, Kapso/WAHA for WhatsApp, Apify for lead capture, Vercel for hosting, Mercado Pago for payments, Node.js and Python for glue, Lighthouse and a browser QA script for checks.
 
-**Backup do n8n** (qualquer máquina com Node 18+ e acesso à internet):
-```
-N8N_API_KEY=... node scripts/export-n8n.mjs
-```
+## Known gaps and next steps
 
-**Atualizar o mini PC** (depois que ele tiver um clone do repo):
-```
-cd ~/frontstep && git pull && sudo bash worker/update.sh
-```
+- Worker source on the production mini PC is not fully mirrored here yet; `worker/backup/` generation is paused and was only tested with mocks.
+- The lead webhook still needs authentication.
+- CRM statuses need normalizing across workflows.
+- Real WhatsApp number on the public site; customer approval loop; automated `.com` purchase.
+- Clone the pipeline for a second vertical/factory once there are about 10 sales.
+- Lessons for the accounting product ([AI4accounting](https://github.com/7thcapitalist/AI4accounting)): agent pipelines need hard guardrails in code, human checkpoints, and cost tracking from day one.
 
-**Gerar preview e cartão de publicação da vitrine** (depois que um PR entrar na `main`):
-```
-node scripts/deploy-vitrine.mjs
-```
-O script passa pelo guard de orçamento, publica apenas em Preview, verifica HTTP/console,
-roda Lighthouse mobile e desktop, anexa os comparativos ao Paperclip e abre o cartão
-“Publicar a vitrine nova?”. Ele registra sucesso ou falha em `ledger/runs.jsonl` e nunca
-promove para produção sozinho.
+## Team / contact
 
-## Regras que valem para tudo
-
-- Nunca fazer polling no n8n. Contar execuções em todo desenho (plano Starter, 2.500/mês).
-- Mensagem para cliente só entre 08:00 e 20:00 BRT; fora disso agenda, nunca descarta.
-- Sem travessão nos textos.
+Built by João Vitor Carvalho ([@7thcapitalist](https://github.com/7thcapitalist)).
+Docs are mostly in English with some Portuguese notes, since the customers are Brazilian.
