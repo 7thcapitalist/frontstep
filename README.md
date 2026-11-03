@@ -6,7 +6,7 @@ Frontstep finds local businesses in Brazil that have good reviews on Google Maps
 
 - **Live site:** https://frontstep-phi.vercel.app
 - **Who it's for:** owners of small Brazilian businesses (clinics, shops, event planners, lawyers, accountants) who are on WhatsApp and Instagram but have no site.
-- **Status:** working prototype, early. The pipeline runs end to end, but there is no meaningful revenue yet. The five showcase sites on the landing page are fictional businesses, labeled as such. The first real customer site was built for a friendly customer with a 100% discount coupon. No funding.
+- **Status:** working prototype, early. The pipeline runs end to end, and it already pays for the daily costs of a college student. The five showcase sites on the landing page are fictional businesses, labeled as such. The first real customer site was built for a friendly customer with a 100% discount coupon. No funding.
 
 ## How it works
 
