@@ -310,3 +310,8 @@ a.dev:hover .dev-desk{transform:translateY(-6px) scale(1.01)}a.dev:hover .dev-ph
 
 /* recorte de celular do hero (hero-m.webp) já vem centrado no mesmo ponto do vídeo */
 @media(max-width:480px){.hero.scrub .m img{object-position:50% 50%}}
+
+/* capítulo sobre o filme: sombra própria para o título manter contraste com o céu claro (WEB-253) */
+.chap::before{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(100% + 30vh);z-index:-1;pointer-events:none;background:linear-gradient(0deg,rgba(11,12,16,.86) 0%,rgba(11,12,16,.6) 45%,rgba(11,12,16,0) 100%)}
+.chap h2,.chap .kick{text-shadow:0 1px 24px rgba(11,12,16,.55)}
+.chap .kick{color:var(--cream)}

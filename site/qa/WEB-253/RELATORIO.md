@@ -27,3 +27,7 @@ node --test site/tests/*.test.mjs
 ```
 
 Provas: [medidas](./medidas.json) e [hero desktop após interação](./desktop-apos-interacao.png).
+
+## Correção de contraste (revisão do WEB-253)
+
+Na main atual o menu já é barra sólida (sem faixa translúcida) e o CTA "Pedir minha prévia" fica em y 646–692 de 720 px no 1º viewport (Chromium 1280×720). O que faltava era sombra atrás dos capítulos sobre o filme: `.chap::before` com gradiente escuro + `text-shadow`, e `.kick` em cream pleno. Prova: `capitulo-contraste-antes.png` e `capitulo-contraste-depois.png`. Só CSS; peso do vídeo e carregamento não mudaram.
