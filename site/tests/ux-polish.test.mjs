@@ -39,3 +39,11 @@ test('flutuante mobile fica compacto e sai antes da CTA final', () => {
   assert.match(floatSafety, /querySelectorAll\('\.cta-sec, \.foot'\)/);
   assert.match(floatSafety, /classList\.toggle\('wa-obscured'/);
 });
+
+test('preço público só com o valor validado, sem depoimento inventado', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const prices = html.match(/R\$\s?[\d.]+/g) || [];
+  assert.ok(prices.length >= 2 && prices.every((p) => p === 'R$ 1.290'));
+  assert.match(html, /<div class="hero-meta">[\s\S]*A partir de R\$ 1\.290[\s\S]*prévia grátis/);
+  assert.doesNotMatch(html, /depoimento|“|★/i);
+});
