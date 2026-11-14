@@ -315,3 +315,4 @@ a.dev:hover .dev-desk{transform:translateY(-6px) scale(1.01)}a.dev:hover .dev-ph
 .chap::before{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(100% + 30vh);z-index:-1;pointer-events:none;background:linear-gradient(0deg,rgba(11,12,16,.86) 0%,rgba(11,12,16,.6) 45%,rgba(11,12,16,0) 100%)}
 .chap h2,.chap .kick{text-shadow:0 1px 24px rgba(11,12,16,.55)}
 .chap .kick{color:var(--cream)}
+.plan-price{margin:6px 0 0;color:rgba(239,234,224,.82);font-size:14px}.plan-price b{display:block;font:700 clamp(20px,1.8vw,28px)/1.1 var(--display);letter-spacing:-.02em;color:var(--cream);margin-bottom:4px}
